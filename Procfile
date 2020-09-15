@@ -1,1 +1,1 @@
-web: gunicorn akgeo.wsgi
+web: gunicorn quiz.wsgi
