@@ -38,7 +38,7 @@ spark = SparkCloud(USERNAME, PASSWORD)
 # spark = SparkCloud(ACCESS_TOKEN)
 
 # List devices
-print(spark.devices)
+# print(spark.devices)
 
 
 
@@ -48,6 +48,6 @@ def logout_view(request):
 
 @login_required(login_url='/accounts/login/')
 def index(request):
-    context = {}
-    return render(request, 'quizapp/index.html', context)
+    context = {'devices':spark.devices}
+    return render(request, 'geo/index.html', context)
 
