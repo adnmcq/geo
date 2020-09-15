@@ -26,6 +26,22 @@ import html
 
 from django.views.decorators.csrf import csrf_exempt
 
+
+from spyrk import SparkCloud
+
+USERNAME = 'ksalette@vt.edu'
+PASSWORD = 'Particle123'
+ACCESS_TOKEN = ' '
+
+spark = SparkCloud(USERNAME, PASSWORD)
+# Or
+# spark = SparkCloud(ACCESS_TOKEN)
+
+# List devices
+print(spark.devices)
+
+
+
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
