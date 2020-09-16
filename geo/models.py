@@ -32,12 +32,12 @@ class Load(models.Model):
     ref4 = models.CharField(max_length=20)
     ref5_type = models.CharField(max_length=1, choices=REF_TYPES)
     ref5 = models.CharField(max_length=20)
-    tracker_chip = models.ForeignKey(TrackerChip)
+    tracker_chip = models.ForeignKey(TrackerChip, on_delete=models.CASCADE)
     #orign =
     #dest =
 
 class Trip(models.Model):
-    load = models.ForeignKey(Load)
-    check_point = models.ForeignKey(FencingModule)
+    load = models.ForeignKey(Load, on_delete=models.CASCADE)
+    check_point = models.ForeignKey(FencingModule, on_delete=models.CASCADE)
     check_point_time = models.DateTimeField()
 
