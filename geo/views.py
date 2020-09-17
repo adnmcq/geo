@@ -58,3 +58,7 @@ def index(request):
     context = {'devices': tracker_dict}
     return render(request, 'geo/index.html', context)
 
+def trackers(request):
+    context = {'devices': tracker_dict}
+    return  render(request, 'geo/trackers.html', context)
+

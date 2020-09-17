@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+ <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Manage Trackers</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group mr-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+            <span data-feather="calendar"></span>
+          </button>
+
+        </div>
+      </div>
+
+      <h2>Active Trackers</h2>
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Device ID</th>
+              <th>Device Name</th>
+              <th>Last Update</th>
+              <th>Last Known Location</th>
+              <th>Load ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for key, value in devices.items %}
+                <tr>
+                    <td>{{ value.CheckPoint_DeviceID }}</td>
+                    <td>{{ key }}</td>
+                    <td>{{ value.Time }}</td>
+                    <td>{{ value.CheckPoint_Location }}</td>
+                    <td>{% if value.Load_ID %} {{ value.Load_ID }} {% else %} None {% endif %}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+{% endblock %}
