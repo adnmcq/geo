@@ -26,20 +26,27 @@ import html
 
 from django.views.decorators.csrf import csrf_exempt
 
-
+# List (Dict) of FencingModules currently along the highway, to be updated by Admin Only.
+# This would never actually show up in views, only stored through models.
+fencing_modules = {
+    'WIFI-FencingMod1': ['Oak Park', 'IL', '60302', 41.881192, -87.777680],
+    'FencingMod2': ['Alexandria', 'VA', '22314', 38.805336, -77.042894],
+    'FencingMod3': ['Arlington', 'TX', '76011', 32.747115, -97.093164],
+}
 from spyrk import SparkCloud
 
-USERNAME = 'ksalette@vt.edu'
-PASSWORD = 'Particle123'
-ACCESS_TOKEN = ' '
+ACCESS_TOKEN = '170204c3da13da0fbb54f2ccd5301dcf209c56c5'
 
-spark = SparkCloud(USERNAME, PASSWORD)
-# Or
-# spark = SparkCloud(ACCESS_TOKEN)
+spark = SparkCloud(ACCESS_TOKEN)
 
-# List devices
-# print(spark.devices)
+tracker_dict = {}
 
+for fm in fencing_modules:
+    for s in spark.devices:
+        if fm == s:
+            tracker_dict[spark.devices[s].Name] = {"Time": spark.devices[s].Time, "CheckPoint_Name": fm, "CheckPoint_DeviceID": spark.devices[s].id, "CheckPoint_Location": fencing_modules[fm]}
+
+print(tracker_dict)
 
 
 def logout_view(request):
@@ -48,6 +55,6 @@ def logout_view(request):
 
 @login_required(login_url='/accounts/login/')
 def index(request):
-    context = {'devices':spark.devices}
+    context = {'devices': tracker_dict}
     return render(request, 'geo/index.html', context)
 
