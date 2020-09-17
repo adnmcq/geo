@@ -2,11 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="45bade7f-c450-4376-89e3-a153ae2419c1" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/static/bs/css/dashboard.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/bs/js/dashboard.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/geo/templates/geo/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/geo/templates/geo/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geo/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/geo/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/quiz/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/quiz/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

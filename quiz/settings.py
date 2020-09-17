@@ -130,15 +130,30 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
+'''
+1. Make sure that django.contrib.staticfiles is included in your INSTALLED_APPS.
 
+2. In your settings file, define STATIC_URL, for example:
+'''
 STATIC_URL = '/static/'
+'''
+3. In your templates, use the static template tag to build the URL for the given relative path using the configured STATICFILES_STORAGE.
+ex:
+{% load static %}
+<img src="{% static "my_app/example.jpg" %}" alt="My image">
 
 
+4. Store your static files in a folder called static in your app. For example my_app/static/my_app/example.jpg.
+(you can store them not in app as well, see next step..)
 
+5. Your project will probably also have static assets that aren’t tied to a particular app. In addition to using a 
+static/ directory inside your apps, you can define a list of directories (STATICFILES_DIRS) 
+in your settings file where Django will also look for static files. For example:
+'''
 
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "staticfiles")
-# ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static")
+]
 
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
