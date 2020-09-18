@@ -22,14 +22,14 @@ import json
 import math
 import random
 import html
-
+import os
 import requests
 
 import configparser
 config = configparser.ConfigParser()
 config.read('conf.ini')
-MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox']
-PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle']
+MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
+PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
 
 
 from django.views.decorators.csrf import csrf_exempt
