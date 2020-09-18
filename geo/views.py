@@ -55,10 +55,14 @@ def logout_view(request):
 
 @login_required(login_url='/accounts/login/')
 def index(request):
-    context = {'devices': tracker_dict}
+    mapbox_access_token = 'pk.eyJ1Ijoia3NhbGV0dGUiLCJhIjoiY2tmN21vdWt6MDN1eDJ5b3R2MnIxOWdrZCJ9.ThMtk4Iu5zy7FxWMxFPgnA'
+    context = {'devices': tracker_dict, 'mapbox_token': mapbox_access_token}
     return render(request, 'geo/index.html', context)
 
 def trackers(request):
     context = {'devices': tracker_dict}
-    return  render(request, 'geo/trackers.html', context)
+    return render(request, 'geo/trackers.html', context)
 
+def loads(request):
+    context = {}
+    return render(request, 'geo/loads.html', context)

@@ -11,23 +11,27 @@
     <meta name="generator" content="Jekyll v4.1.1">
     <title>GEO</title>
 
+    <!-- MapBox -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+
     <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/dashboard/">
 
     <!-- Bootstrap core CSS -->
-<!--<link href="/docs/4.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">-->
-<link rel="stylesheet" type="text/css" href="{% static 'bs/css/bootstrap.min.css' %}">
+    <!--<link href="/docs/4.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">-->
+    <link rel="stylesheet" type="text/css" href="{% static 'bs/css/bootstrap.min.css' %}">
 
 
 
-    <!-- Favicons -->
-<link rel="apple-touch-icon" href="/docs/4.5/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
-<link rel="icon" href="/docs/4.5/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="/docs/4.5/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
-<link rel="manifest" href="/docs/4.5/assets/img/favicons/manifest.json">
-<link rel="mask-icon" href="/docs/4.5/assets/img/favicons/safari-pinned-tab.svg" color="#563d7c">
-<link rel="icon" href="/docs/4.5/assets/img/favicons/favicon.ico">
-<meta name="msapplication-config" content="/docs/4.5/assets/img/favicons/browserconfig.xml">
-<meta name="theme-color" content="#563d7c">
+        <!-- Favicons -->
+    <link rel="apple-touch-icon" href="/docs/4.5/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="/docs/4.5/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/docs/4.5/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="/docs/4.5/assets/img/favicons/manifest.json">
+    <link rel="mask-icon" href="/docs/4.5/assets/img/favicons/safari-pinned-tab.svg" color="#563d7c">
+    <link rel="icon" href="/docs/4.5/assets/img/favicons/favicon.ico">
+    <meta name="msapplication-config" content="/docs/4.5/assets/img/favicons/browserconfig.xml">
+    <meta name="theme-color" content="#563d7c">
 
 
     <style>
@@ -87,8 +91,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
-              <span data-feather="shopping-cart"></span>
+            <a class="nav-link" href="{% url 'loads' %}">
+              <span data-feather="clock"></span>
               Manage Loads
             </a>
           </li>
@@ -145,85 +149,3 @@
 
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-<!--------->
-
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <title>GEO</title>-->
-
-
-<!--<link rel="stylesheet" type="text/css" href="{% static 'bs/css/bootstrap.min.css' %}">-->
-<!--&lt;!&ndash;<link rel="stylesheet" type="text/css" href="{% static 'css/bracket.css' %}">&ndash;&gt;-->
-
-<!--    <style>-->
-
-<!--    </style>-->
-
-
-<!--</head>-->
-
-
-
-<!--<body>-->
-
-<!--&lt;!&ndash;-->
-<!--aidenquiz.com-->
-<!-- -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
-<!--Aidenquiz (home)             Login/Logout-->
-<!--Quizzes  Leaderboard  Patreon   Youtube   Instagram-->
-
-
-
-<!--&ndash;&gt;-->
-<!--    <ul>-->
-<!--          <li>-->
-<!--             <a href="{% url 'index' %}">GEO.com</a>-->
-<!--          </li>-->
-
-<!--            <li>-->
-<!--         <a href="{% url 'logout' %}?next=/">Logout</a>  &lt;!&ndash;  ?next=/ &ndash;&gt;-->
-<!--          </li>-->
-
-<!--        </ul>-->
-<!--<span>-->
-
-<!--&lt;!&ndash;<a href="{% url 'quizzes' %}">Quizzes</a>&ndash;&gt;-->
-<!--&lt;!&ndash;    <a href="{% url 'leaderboard' %}">Leaderboard</a>&ndash;&gt;-->
-<!--&lt;!&ndash;    <a href="https://www.youtube.com">Youtube</a>&ndash;&gt;-->
-<!--&lt;!&ndash;    <a href="https://www.instagram.com">Instagram</a>&ndash;&gt;-->
-<!--</span>-->
-
-<!--{% block scontent %}-->
-
-<!--{% endblock %}-->
-
-<!--  <script-->
-<!--  src="https://code.jquery.com/jquery-3.4.1.js"-->
-<!--  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="-->
-<!--  crossorigin="anonymous"></script>-->
-
-<!--    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>-->
-<!--<script type="text/javascript" src="{% static 'bs/js/bootstrap.min.js' %}"></script>-->
-<!--  </body>-->
-
-
-<!--   <script>-->
-<!--{% block sjs %}-->
-
-<!--{% endblock %}-->
-
-<!--</script>-->
-
-<!--</html>-->

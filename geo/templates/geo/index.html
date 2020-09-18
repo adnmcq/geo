@@ -12,12 +12,26 @@
             <span data-feather="calendar"></span>
           </button>
 
-           {{devices}}
-
         </div>
       </div>
+      <!--<canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>-->
+        <div id='map' style='width: 100%; height: 380px;'></div>
+        <script>
+        mapboxgl.accessToken = '{{ mapbox_token }}';
+        var map = new mapboxgl.Map({
+          container: 'map',
+          style: 'mapbox://styles/mapbox/streets-v11',
+          center: [-101.641, 39.366],
+          zoom: 3
+        });
 
-      <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+        {% for key, value in devices.items %}
+        var {{key}} = new mapboxgl.Marker()
+          .setLngLat([{{ value.CheckPoint_Location.4 }}, {{ value.CheckPoint_Location.3 }}])
+          .addTo(map);
+        {% endfor %}
+
+        </script>
 
       <h2>Section title</h2>
       <div class="table-responsive">
