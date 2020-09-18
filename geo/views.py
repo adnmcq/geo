@@ -23,6 +23,14 @@ import math
 import random
 import html
 
+import requests
+
+import configparser
+config = configparser.ConfigParser()
+config.read('conf.ini')
+MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox']
+PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle']
+
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -35,16 +43,20 @@ fencing_modules = {
 }
 from spyrk import SparkCloud
 
-ACCESS_TOKEN = '170204c3da13da0fbb54f2ccd5301dcf209c56c5'
+# ACCESS_TOKEN = '170204c3da13da0fbb54f2ccd5301dcf209c56c5'
 
-spark = SparkCloud(ACCESS_TOKEN)
+spark = SparkCloud(PARTICLE_ACCESS_TOKEN)
 
 tracker_dict = {}
 
 for fm in fencing_modules:
     for s in spark.devices:
         if fm == s:
-            tracker_dict[spark.devices[s].Name] = {"Time": spark.devices[s].Time, "CheckPoint_Name": fm, "CheckPoint_DeviceID": spark.devices[s].id, "CheckPoint_Location": fencing_modules[fm]}
+            tracker_dict[spark.devices[s].Name] = {"Time": spark.devices[s].Time,
+                                                   "CheckPoint_Name": fm,
+                                                   "CheckPoint_DeviceID": spark.devices[s].id,
+                                                   "CheckPoint_Location": fencing_modules[fm]
+                                                   }
 
 print(tracker_dict)
 
@@ -55,8 +67,7 @@ def logout_view(request):
 
 @login_required(login_url='/accounts/login/')
 def index(request):
-    mapbox_access_token = 'pk.eyJ1Ijoia3NhbGV0dGUiLCJhIjoiY2tmN21vdWt6MDN1eDJ5b3R2MnIxOWdrZCJ9.ThMtk4Iu5zy7FxWMxFPgnA'
-    context = {'devices': tracker_dict, 'mapbox_token': mapbox_access_token}
+    context = {'devices': tracker_dict, 'mapbox_token': MAPBOX_ACCESS_TOKEN}
     return render(request, 'geo/index.html', context)
 
 def trackers(request):
@@ -66,3 +77,40 @@ def trackers(request):
 def loads(request):
     context = {}
     return render(request, 'geo/loads.html', context)
+
+
+def api(request):
+    '''
+    This is for testing api stuff
+    :param request:
+    :return:
+    '''
+
+    #https://docs.mapbox.com/api/search/#geocoding
+
+    url = "https://api.particle.io/v1/devices"
+
+    payload = {}
+    headers = {
+        'Authorization': 'Bearer %s'%PARTICLE_ACCESS_TOKEN
+    }
+
+    devices_response = requests.request("GET", url, headers=headers, data=payload)
+    for device_json in devices_response.json():
+
+        print(device_json['name'])
+
+
+
+    print(devices_response.text.encode('utf8'))
+
+    return JsonResponse(devices_response.json(), safe=False)
+
+def db(request):
+    '''
+    This is for creating stuff in db for testing
+    :param request:
+    :return:
+    '''
+
+    return JsonResponse({"ok":"ok"})
