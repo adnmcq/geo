@@ -43,8 +43,6 @@ fencing_modules = {
 }
 from spyrk import SparkCloud
 
-# ACCESS_TOKEN = '170204c3da13da0fbb54f2ccd5301dcf209c56c5'
-
 spark = SparkCloud(PARTICLE_ACCESS_TOKEN)
 
 tracker_dict = {}
@@ -57,9 +55,6 @@ for fm in fencing_modules:
                                                    "CheckPoint_DeviceID": spark.devices[s].id,
                                                    "CheckPoint_Location": fencing_modules[fm]
                                                    }
-
-print(tracker_dict)
-
 
 def logout_view(request):
     logout(request)
