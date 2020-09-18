@@ -31,8 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-'quizapp.apps.QuizappConfig',
-'geo.apps.GeoConfig',
+    'geo.apps.GeoConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -81,6 +80,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
 
 # db, dbu, dbp = 'pets', 'pets', 'petshcu1234'
 # DATABASES = {
