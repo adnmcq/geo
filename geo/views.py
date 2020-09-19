@@ -236,7 +236,7 @@ def db(request):
             device_name=device_json['name'],
             created_date=created_date,
             tracker_id=device_json['id'],
-            client=cli.pk
+            # client=cli.pk
         )
 
 
