@@ -54,6 +54,7 @@ class Load(models.Model):
         ('P', 'PRO Number'),
         ('R', 'Purchase Order'),
         ('S', 'Sales Order'),
+        ('O', 'Other'),
     )
     ref1_type = models.CharField(max_length=1, choices=REF_TYPES,null=True, blank=True)
     ref1 = models.CharField(max_length=20, null=True, blank=True)
@@ -78,12 +79,6 @@ class Load(models.Model):
 
     def __str__(self):
         return 'orig: %s \ndest: %s'%(str(self.orig), str(self.dest))
-
-# class Trip(models.Model):
-#     load = models.ForeignKey(Load, on_delete=models.CASCADE)
-#     check_point = models.ForeignKey(FencingModule, on_delete=models.CASCADE)
-#     check_point_time = models.DateTimeField()
-
 
 class Trip(models.Model):
     tracker = models.ForeignKey(TrackerChip, on_delete=models.CASCADE)
