@@ -27,7 +27,7 @@ class FencingModule(models.Model): #Doesn't need any user auth since this will o
     These are the static 'central' scanners on the side of the highway. They do not move
 
     '''
-    device_name = models.CharField(max_length=30)
+    device_name = models.CharField(max_length=40)
     created_date = models.DateTimeField()
     loc = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE)
     # city = models.CharField(max_length=30)
@@ -39,8 +39,8 @@ class FencingModule(models.Model): #Doesn't need any user auth since this will o
         return '%s - %s'%(self.device_name, str(self.loc))
 
 class TrackerChip(models.Model): #User auth required.  Users should only be able to see their specific trackers
-    tracker_id = models.CharField(max_length=12, null=True, blank=True) #Unique ID labeled on the device - upload via qr code scanner
-    device_name = models.CharField(max_length=30, null=True, blank=True)
+    tracker_id = models.CharField(max_length=40, null=True, blank=True) #Unique ID labeled on the device - upload via qr code scanner
+    device_name = models.CharField(max_length=40, null=True, blank=True)
     created_date = models.DateTimeField()
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.CASCADE)
     def __str__(self):
