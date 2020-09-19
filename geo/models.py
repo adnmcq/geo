@@ -55,16 +55,16 @@ class Load(models.Model):
         ('R', 'Purchase Order'),
         ('S', 'Sales Order'),
     )
-    ref1_type = models.CharField(max_length=1, choices=REF_TYPES)
-    ref1 = models.CharField(max_length=20)
-    ref2_type = models.CharField(max_length=1, choices=REF_TYPES)
-    ref2 = models.CharField(max_length=20)
-    ref3_type = models.CharField(max_length=1, choices=REF_TYPES)
-    ref3 = models.CharField(max_length=20)
-    ref4_type = models.CharField(max_length=1, choices=REF_TYPES)
-    ref4 = models.CharField(max_length=20)
-    ref5_type = models.CharField(max_length=1, choices=REF_TYPES)
-    ref5 = models.CharField(max_length=20)
+    ref1_type = models.CharField(max_length=1, choices=REF_TYPES,null=True, blank=True)
+    ref1 = models.CharField(max_length=20, null=True, blank=True)
+    ref2_type = models.CharField(max_length=1, choices=REF_TYPES, null=True, blank=True)
+    ref2 = models.CharField(max_length=20, null=True, blank=True)
+    ref3_type = models.CharField(max_length=1, choices=REF_TYPES, null=True, blank=True)
+    ref3 = models.CharField(max_length=20, null=True, blank=True)
+    ref4_type = models.CharField(max_length=1, choices=REF_TYPES, null=True, blank=True)
+    ref4 = models.CharField(max_length=20, null=True, blank=True)
+    ref5_type = models.CharField(max_length=1, choices=REF_TYPES, null=True, blank=True)
+    ref5 = models.CharField(max_length=20, null=True, blank=True)
 
     orig = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE, related_name='orig')
     dest = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE, related_name='dest')
@@ -84,17 +84,6 @@ class Load(models.Model):
 #     check_point = models.ForeignKey(FencingModule, on_delete=models.CASCADE)
 #     check_point_time = models.DateTimeField()
 
-
-# class Person(models.Model):
-#     name = models.CharField(max_length=50)
-#
-# class Group(models.Model):
-#     name = models.CharField(max_length=128)
-#     members = models.ManyToManyField(
-#         Person,
-#         through='Membership',
-#         through_fields=('group', 'person'),
-#     )
 
 class Trip(models.Model):
     tracker = models.ForeignKey(TrackerChip, on_delete=models.CASCADE)

@@ -22,6 +22,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'bs/css/bootstrap.min.css' %}">
 
 
+    <!--DataTables-->
+    <link rel="stylesheet" type="text/css" href="{% static 'DataTables/css/dataTables.bootstrap4.min.css' %}">
+
+
 
         <!-- Favicons -->
     <link rel="apple-touch-icon" href="/docs/4.5/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
@@ -127,17 +131,23 @@
     </main>
   </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-      <script>window.jQuery || document.write('<script src="/docs/4.5/assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
-
+<!--<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>-->
+<!--      <script>window.jQuery || document.write('<script src="/docs/4.5/assets/js/vendor/jquery.slim.min.js"><\/script>')</script>-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    
 <!--    <script src="/docs/4.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf" crossorigin="anonymous"></script>-->
 <script type="text/javascript" src="{% static 'bs/js/bootstrap.min.js' %}"></script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+<!--        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>-->
 
 <!--        <script src="dashboard.js"></script>-->
-<script type="text/javascript" src="{% static 'bs/js/dashboard.js' %}"></script>
+<!--<script type="text/javascript" src="{% static 'bs/js/dashboard.js' %}"></script>-->
+
+<!--    DataTables-->
+    <script type="text/javascript" src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'DataTables/js/dataTables.bootstrap4.min.js' %}"></script>
+
 
      <script>
 {% block js %}

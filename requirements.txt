@@ -3,3 +3,5 @@ django-heroku
 Pillow
 spyrk
 configparser
+django-datatables-view
+Faker
