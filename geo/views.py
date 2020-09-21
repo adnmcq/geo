@@ -13,6 +13,8 @@ from django.contrib.auth import login, logout, authenticate
 
 from django.urls import reverse
 
+from django.db import transaction
+
 
 from django.db.utils import IntegrityError
 
@@ -188,6 +190,8 @@ def xdb(request):
 
     return JsonResponse({"ok": "ok"})
 
+
+@transaction.atomic
 def db(request):
     '''
     This is for creating stuff in db for testing
