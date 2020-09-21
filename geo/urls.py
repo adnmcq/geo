@@ -18,4 +18,5 @@ urlpatterns = [
     #for testing
     path('api', views.api, name='api'),
     path('db', views.db, name='db'),
+    path('xdb', views.xdb, name='xdb'),
 ]

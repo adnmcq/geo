@@ -100,15 +100,22 @@ class LoadListJson(BaseDatatableView):
 
 class TripListJson(BaseDatatableView):
     model = Trip
-    columns = ['tracker', 'load', 'check_point',
+    columns = ['tracker', 'orig','dest', 'check_point',
                'check_point_time', 'active']
 
-    order_columns = ['tracker', 'load', 'check_point',
+    order_columns = ['tracker', 'orig','dest', 'check_point',
                'check_point_time', 'active']
     max_display_length = 500
 
     def render_column(self, row, column):
-        return super(TripListJson, self).render_column(row, column)
+        if column == 'orig':
+            # escape HTML for security reasons
+            return escape(row.load.orig.city)
+        elif column == 'dest':
+            # escape HTML for security reasons
+            return escape(row.load.dest.city)
+        else:
+            return super(TripListJson, self).render_column(row, column)
 
     def filter_queryset(self, qs):
         # use parameters passed in GET request to filter queryset
@@ -165,6 +172,22 @@ def api(request):
 
     return JsonResponse(devices_response.json(), safe=False)
 
+
+def xdb(request):
+    '''
+    This is for creating stuff in db for testing
+    :param request:
+    :return:
+    '''
+
+    Trip.objects.all().delete()
+    Load.objects.all().delete()
+    TrackerChip.objects.all().delete()
+    FencingModule.objects.all().delete()
+    Location.objects.all().delete()
+
+    return JsonResponse({"ok": "ok"})
+
 def db(request):
     '''
     This is for creating stuff in db for testing
@@ -185,6 +208,7 @@ def db(request):
 
 
     import pandas as pd
+    import re
 
     import datetime
 
@@ -196,29 +220,22 @@ def db(request):
     )
     #Locations
     cities_df = pd.read_csv('cities.csv', sep='\t', lineterminator='\r')
-    for i, city in cities_df.iterrows():
-        print(city)
+    for i, city_row in cities_df.iterrows():
+        print(city_row)
         city = i[1].strip()
         state = i[2].strip()
-        zip = 22308#Faker.zip
-        lat, lon = 40,40
+        zipc = 22308#Faker.zip
+        location_string = city_row['Location']
+        parts = location_string.split(' ')
+        lat, lon = re.findall( r'\d+\.*\d*', parts[0])[0], \
+                   re.findall( r'\d+\.*\d*', parts[1])[0]
         cit, c = Location.objects.get_or_create(
             city=city,
             state=state,
-            zip=zip,
+            zip=zipc,
             lat=lat, lon=lon
         )
     #FencingModule
-
-    for device_name, v in fencing_modules.items():
-        loc = Location.objects.get(city='Chicago')
-        fm, c = FencingModule.objects.get_or_create(
-            device_name=device_name,
-            created_date=created_date,
-            loc=loc,
-        )
-
-
     #TrackerChips
 
     url = "https://api.particle.io/v1/devices"
@@ -231,17 +248,43 @@ def db(request):
     devices_response = requests.request("GET", url, headers=headers, data=payload)
     for device_json in devices_response.json():
 
-        print(device_json['name'], device_json)
-        tc, c = TrackerChip.objects.get_or_create(
-            device_name=device_json['name'],
-            created_date=created_date,
-            tracker_id=device_json['id'],
-            # client=cli.pk
-        )
+        print(device_json)
+        if 'Fencing' not in device_json['name']:
+            tc, c = TrackerChip.objects.get_or_create(
+                device_name=device_json['name'],
+                created_date=created_date,
+                tracker_id=device_json['id'],
+                client=cli
+            )
+        else:
+            loc = Location.objects.get(city='Chicago')
+            fm, c = FencingModule.objects.get_or_create(
+                device_name=device_json['name'],
+                created_date=created_date,
+                loc=loc,
+            )
 
 
 
     #Load
+    origins = ['Temecula','Pueblo','Topeka']
+    destinations = ['Abilene','Simi Valley','Fargo']
+
+    tracker = TrackerChip.objects.get(device_name= 'LTE-BeaconFinder1')
+    for o, d in zip(origins, destinations):
+        oo = Location.objects.get(city = o)
+        do = Location.objects.get(city = d)
+
+        fm, c = Load.objects.get_or_create(
+            ref1_type='L',
+            ref1=o[0:3]+d[0:3],
+            orig=oo, dest=do,
+
+
+        )
+        if c:
+            fm.tracker_chips.add(tracker)
+
     #Trip
 
     fake.name()
