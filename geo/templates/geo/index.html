@@ -83,10 +83,17 @@ $(document).on('change', '.trip_checkbox', function() {
 
     $.post( "{% url 'add_trip_to_map' %}", { trip_id: trip_id }, function( data ) {
 console.log(data);
+    data = JSON.parse(data);
     //console.log(data["dest_lon"]);
 
+        lon=data["dest_lon"];
+    lon=-43;
+
+            lat=data["dest_lat"];
+    lat=-43;
+
     var marker = new mapboxgl.Marker()
-.setLngLat([data["dest_lat"], data["dest_lon"]])
+.setLngLat([data["dest_lat"], lon])
 .addTo(map);
 
 
