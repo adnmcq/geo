@@ -239,6 +239,9 @@ def db(request):
             zip=zipc,
             lat=lat, lon=lon
         )
+
+    sid = transaction.savepoint()
+    transaction.savepoint_commit(sid)
     #FencingModule
     #TrackerChips
 
@@ -268,7 +271,8 @@ def db(request):
                 loc=loc,
             )
 
-
+    sid2 = transaction.savepoint()
+    transaction.savepoint_commit(sid2)
 
     #Load
     origins = ['Temecula','Pueblo','Topeka']
