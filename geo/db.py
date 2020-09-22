@@ -57,7 +57,8 @@ def a():
     )
     #Locations
     print('Location')
-    cities_df = pd.read_csv(os.path.join(base_dir, 'cities.csv'), sep='\t', lineterminator='\r')
+    cities_df = pd.read_csv(os.path.join(base_dir, 'cities.csv'),
+                            sep='\t', lineterminator='\r', header=0)
 
     print(cities_df)
     for i, city_row in cities_df.iterrows():
@@ -154,4 +155,4 @@ def b():
 
 a()
 
-# b()
+b()
