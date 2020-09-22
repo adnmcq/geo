@@ -1,4 +1,4 @@
-import os
+import os, platform
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "quiz.settings")
 
@@ -57,8 +57,13 @@ def a():
     )
     #Locations
     print('Location')
+
+    if platform.system() == 'Windows':
+        lt = '\r'
+    else:
+        lt = '\n'
     cities_df = pd.read_csv(os.path.join(base_dir, 'cities.csv'),
-                            sep='\t', lineterminator='\r')
+                            sep='\t', lineterminator=lt)
 
     print(cities_df)
     for i, city_row in cities_df.iterrows():
