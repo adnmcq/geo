@@ -5,4 +5,4 @@ spyrk
 configparser
 django-datatables-view
 Faker
-pandas
+pandas==1.0.2
