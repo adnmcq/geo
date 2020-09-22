@@ -137,3 +137,6 @@ def db():
     fake.address()
 
     return 'ok'
+
+
+db()
