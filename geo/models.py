@@ -27,6 +27,7 @@ class FencingModule(models.Model): #Doesn't need any user auth since this will o
     These are the static 'central' scanners on the side of the highway. They do not move
 
     '''
+    device_id = models.CharField(max_length=30)
     device_name = models.CharField(max_length=40)
     created_date = models.DateTimeField()
     loc = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE)

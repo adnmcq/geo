@@ -140,9 +140,20 @@ def trackers(request):
     context = {'devices': tracker_dict}
     return render(request, 'geo/trackers.html', context)
 
+
+## SET UP FOR WEBHOOK. Webhook should post events to url: "/<device_id>"
+## Need to add event data to database and map to correct fields
+def events(request, device_id):
+    module = FencingModule.objects.get(device_id = device_id)
+    if request.method == "POST":
+        print(request.POST)
+        print(request.FILES)
+    return render(request, 'geo/trackers.html')
+
 def loads(request):
     context = {}
     return render(request, 'geo/loads.html', context)
+
 
 
 def api(request):
