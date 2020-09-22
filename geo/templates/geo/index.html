@@ -73,6 +73,28 @@
 
 {% block js %}
 
+// $(<parent>).on('<event>', '<child>', callback);
+$(document).on('change', '.trip_checkbox', function() {
+    if(this.checked) {
+      // checkbox is checked
+
+    var trip_id = $(this).attr("id");
+    console.log(trip_id);
+
+    $.post( "{% url 'add_trip_to_map' %}", { trip_id: trip_id }, function( data ) {
+console.log(data);
+    //console.log(data["dest_lon"]);
+
+    var marker = new mapboxgl.Marker()
+.setLngLat([data["dest_lat"], data["dest_lon"]])
+.addTo(map);
+
+
+});
+
+
+    } //end if checked
+});
 
 //map stuff
         mapboxgl.accessToken = '{{ mapbox_token }}';

@@ -126,6 +126,42 @@ class TripListJson(BaseDatatableView):
             qs = qs.filter(tracker__device_name__istartswith=search)
         return qs
 
+    def prepare_results(self, qs):
+        # prepare list with output column data
+        # queryset is already paginated here
+        # shop_id = self.kwargs.get('shop_id', None)
+        # customer_id = self.kwargs.get('customer_id', None)
+        # simple example:
+
+        json_data = []
+        for item in qs:
+            # if customer_id:
+            #     json_data.append([
+            #         "<a href='/shop/crm/%s/'>%s</a>" % (item.id, item.erpid),
+            #         item.state,
+            #     ])
+            # else:  # if shop_id:
+            id = item.id
+            name = item.tracker.device_name
+            value = 'trip'+str(item.id)
+            chkbox_html = '''<input type="checkbox" id="%s" 
+            class = "trip_checkbox"
+            name="%s" value="%s">
+             <label for="%s"> %s</label> 
+            '''%(id, name, value, name, name)
+
+
+            json_data.append([
+                # "<a href='%s/'>%s</a>" % (item.id, item.tracker),
+                chkbox_html,
+                item.load.orig.city,
+                item.load.dest.city,
+                item.check_point if item.check_point else '',
+                item.check_point_time if item.check_point_time else '',
+                item.active if item.active else ''
+            ])
+        return json_data
+
 
 def logout_view(request):
     logout(request)
@@ -145,6 +181,18 @@ def trackers(request):
 def loads(request):
     context = {}
     return render(request, 'geo/loads.html', context)
+
+
+@csrf_exempt
+def add_trip_to_map(request):
+    trip_id = request.POST['trip_id']
+    trip = Trip.objects.get(pk = trip_id)
+    orig, dest = trip.load.orig, trip.load.dest
+    data = {'orig_lat':str(orig.lat),
+            'orig_lon':str(orig.lon),
+            'dest_lat':str(dest.lat),
+            'dest_lon':str(dest.lon)}
+    return HttpResponse(json.dumps(data))
 
 
 def api(request):
@@ -175,135 +223,5 @@ def api(request):
     return JsonResponse(devices_response.json(), safe=False)
 
 
-def xdb(request):
-    '''
-    This is for creating stuff in db for testing
-    :param request:
-    :return:
-    '''
-
-    Trip.objects.all().delete()
-    Load.objects.all().delete()
-    TrackerChip.objects.all().delete()
-    FencingModule.objects.all().delete()
-    Location.objects.all().delete()
-
-    return JsonResponse({"ok": "ok"})
 
 
-@transaction.atomic
-def db(request):
-    '''
-    This is for creating stuff in db for testing
-    :param request:
-    :return:
-    '''
-
-    # List (Dict) of FencingModules currently along the highway, to be updated by Admin Only.
-    # This would never actually show up in views, only stored through models.
-    fencing_modules = {
-        'WIFI-FencingMod1': ['Oak Park', 'IL', '60302', 41.881192, -87.777680],
-        'FencingMod2': ['Alexandria', 'VA', '22314', 38.805336, -77.042894],
-        'FencingMod3': ['Arlington', 'TX', '76011', 32.747115, -97.093164],
-    }
-
-    from faker import Faker
-    fake = Faker()
-
-
-    import pandas as pd
-    import re
-
-    import datetime
-
-    created_date=datetime.date.today()
-
-    #Clients
-    cli, c = Client.objects.get_or_create(
-        user = request.user
-    )
-    #Locations
-    cities_df = pd.read_csv('cities.csv', sep='\t', lineterminator='\r')
-    for i, city_row in cities_df.iterrows():
-        print(city_row)
-        city = i[1].strip()
-        state = i[2].strip()
-        zipc = 22308#Faker.zip
-        location_string = city_row['Location']
-        parts = location_string.split(' ')
-        lat, lon = re.findall( r'\d+\.*\d*', parts[0])[0], \
-                   re.findall( r'\d+\.*\d*', parts[1])[0]
-        cit, c = Location.objects.get_or_create(
-            city=city,
-            state=state,
-            zip=zipc,
-            lat=lat, lon=lon
-        )
-
-    # sid = transaction.savepoint()
-    # transaction.savepoint_commit(sid)
-    # qs = Location.objects.all()
-    # for item in qs:
-    #     item.save()
-    # qs = TrackerChip.objects.all()
-    # for item in qs:
-    #     item.save()
-    #FencingModule
-    #TrackerChips
-
-    url = "https://api.particle.io/v1/devices"
-
-    payload = {}
-    headers = {
-        'Authorization': 'Bearer %s'%PARTICLE_ACCESS_TOKEN
-    }
-
-    devices_response = requests.request("GET", url, headers=headers, data=payload)
-    for device_json in devices_response.json():
-
-        print(device_json)
-        if 'Fencing' not in device_json['name']:
-            tc, c = TrackerChip.objects.get_or_create(
-                device_name=device_json['name'],
-                created_date=created_date,
-                tracker_id=device_json['id'],
-                client=cli
-            )
-        else:
-            loc = Location.objects.get(city='Chicago')
-            fm, c = FencingModule.objects.get_or_create(
-                device_name=device_json['name'],
-                created_date=created_date,
-                loc=loc,
-            )
-
-    # sid2 = transaction.savepoint()
-    # transaction.savepoint_commit(sid2)
-
-    #Load
-    origins = ['Temecula','Pueblo','Topeka']
-    destinations = ['Abilene','Simi Valley','Fargo']
-
-    tracker = TrackerChip.objects.get(device_name= 'LTE-BeaconFinder1')
-    for o, d in zip(origins, destinations):
-        oo = Location.objects.get(city = o)
-        do = Location.objects.get(city = d)
-
-        fm, c = Load.objects.get_or_create(
-            ref1_type='L',
-            ref1=o[0:3]+d[0:3],
-            orig=oo, dest=do,
-
-
-        )
-        if c:
-            fm.tracker_chips.add(tracker)
-
-    #Trip
-
-    fake.name()
-    # 'Lucy Cechtelar'
-
-    fake.address()
-
-    return JsonResponse({"ok":"ok"})

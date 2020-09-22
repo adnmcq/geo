@@ -14,9 +14,9 @@ urlpatterns = [
     url(r'^load/data/$', login_required(views.LoadListJson.as_view()), name='load_list_json'),
     url(r'^trip/data/$', login_required(views.TripListJson.as_view()), name='trip_list_json'),
 
+    path('add_trip_to_map', views.add_trip_to_map, name='add_trip_to_map'),
 
     #for testing
     path('api', views.api, name='api'),
-    path('db', views.db, name='db'),
-    path('xdb', views.xdb, name='xdb'),
+
 ]
