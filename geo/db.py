@@ -15,8 +15,18 @@ config.read(os.path.join(base_dir, 'conf.ini'))
 MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
 PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
 
+from faker import Faker
 
-def db():
+fake = Faker()
+
+import pandas as pd
+import re
+
+import datetime
+
+created_date=datetime.date.today()
+
+def a():
     '''
     This is for creating stuff in db for testing
     :param request:
@@ -37,16 +47,9 @@ def db():
         'FencingMod3': ['Arlington', 'TX', '76011', 32.747115, -97.093164],
     }
 
-    from faker import Faker
-    fake = Faker()
 
 
-    import pandas as pd
-    import re
 
-    import datetime
-
-    created_date=datetime.date.today()
 
     #Clients
     cli, c = Client.objects.get_or_create(
@@ -80,6 +83,13 @@ def db():
     #     item.save()
     #FencingModule
     #TrackerChips
+
+
+def b():
+
+    cli= Client.objects.get(
+        user = User.objects.get(username='ksalette')
+    )
 
     url = "https://api.particle.io/v1/devices"
 
@@ -139,4 +149,6 @@ def db():
     return 'ok'
 
 
-db()
+a()
+
+b()
