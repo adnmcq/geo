@@ -240,14 +240,14 @@ def db(request):
             lat=lat, lon=lon
         )
 
-    sid = transaction.savepoint()
-    transaction.savepoint_commit(sid)
-    qs = Location.objects.all()
-    for item in qs:
-        item.save()
-    qs = TrackerChip.objects.all()
-    for item in qs:
-        item.save()
+    # sid = transaction.savepoint()
+    # transaction.savepoint_commit(sid)
+    # qs = Location.objects.all()
+    # for item in qs:
+    #     item.save()
+    # qs = TrackerChip.objects.all()
+    # for item in qs:
+    #     item.save()
     #FencingModule
     #TrackerChips
 
@@ -277,8 +277,8 @@ def db(request):
                 loc=loc,
             )
 
-    sid2 = transaction.savepoint()
-    transaction.savepoint_commit(sid2)
+    # sid2 = transaction.savepoint()
+    # transaction.savepoint_commit(sid2)
 
     #Load
     origins = ['Temecula','Pueblo','Topeka']
