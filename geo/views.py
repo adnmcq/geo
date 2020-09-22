@@ -123,7 +123,7 @@ class TripListJson(BaseDatatableView):
         # use parameters passed in GET request to filter queryset
         search = self.request.GET.get('search[value]', None)
         if search:
-            qs = qs.filter(tracker_device_name__istartswith=search)
+            qs = qs.filter(tracker__device_name__istartswith=search)
         return qs
 
 
