@@ -56,6 +56,7 @@ def a():
         user = User.objects.get(username='ksalette')
     )
     #Locations
+    print('Location')
     cities_df = pd.read_csv(os.path.join(base_dir, 'cities.csv'), sep='\t', lineterminator='\r')
     for i, city_row in cities_df.iterrows():
         print(city_row)
