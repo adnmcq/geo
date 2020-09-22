@@ -242,6 +242,12 @@ def db(request):
 
     sid = transaction.savepoint()
     transaction.savepoint_commit(sid)
+    qs = Location.objects.all()
+    for item in qs:
+        item.save()
+    qs = TrackerChip.objects.all()
+    for item in qs:
+        item.save()
     #FencingModule
     #TrackerChips
 
