@@ -86,14 +86,14 @@ console.log(data);
     data = JSON.parse(data);
     //console.log(data["dest_lon"]);
 
-        lon=data["dest_lon"];
-    lon=-43;
+        dest_lon=data["dest_lon"];
+            dest_lat=data["dest_lat"];
 
-            lat=data["dest_lat"];
-    lat=-43;
 
+    var dest_ll = new mapboxgl.LngLat(data["dest_lon"], data["dest_lat"]);
+console.log(dest_ll)
     var marker = new mapboxgl.Marker()
-.setLngLat([data["dest_lat"], lon])
+.setLngLat(dest_ll)
 .addTo(map);
 
 

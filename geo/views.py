@@ -199,9 +199,9 @@ def add_trip_to_map(request):
     trip = Trip.objects.get(pk = trip_id)
     orig, dest = trip.load.orig, trip.load.dest
     data = {'orig_lat':str(orig.lat),
-            'orig_lon':str(orig.lon),
+            'orig_lon':str(0-orig.lon),
             'dest_lat':str(dest.lat),
-            'dest_lon':str(dest.lon)}
+            'dest_lon':str(0-dest.lon)}
     return HttpResponse(json.dumps(data))
 
 
