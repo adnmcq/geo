@@ -164,4 +164,4 @@ LOGIN_REDIRECT_URL  = '/'
 #https://github.com/heroku/django-heroku
 # Configure Django App for Heroku.
 import django_heroku
-django_heroku.settings(locals())
+django_heroku.settings(locals(), logging=False)  #https://stackoverflow.com/questions/18920428/django-logging-on-heroku

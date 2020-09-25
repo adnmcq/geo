@@ -40,6 +40,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.utils.html import escape
 
+import logging
+logger = logging.getLogger('django.server')
+
+
 
 # from spyrk import SparkCloud
 # spark = SparkCloud(PARTICLE_ACCESS_TOKEN)
@@ -169,6 +173,9 @@ def logout_view(request):
 
 @login_required(login_url='/accounts/login/')
 def index(request):
+    logger.info('log info Im on the index')
+    logger.error('log error Im on the index')
+    print('print Im on the index')
     tracker_dict = {}
     context = {'devices': tracker_dict, 'mapbox_token': MAPBOX_ACCESS_TOKEN}
     return render(request, 'geo/index.html', context)
@@ -182,11 +189,17 @@ def trackers(request):
 ## SET UP FOR WEBHOOK. Webhook should post events to url: "/<device_id>"
 ## Need to add event data to database and map to correct fields
 def events(request, device_id):
-    module = FencingModule.objects.get(device_id=device_id)
-    if request.method == "POST":
-        print(request.POST)
-        print(request.FILES)
-    return render(request, 'geo/trackers.html')
+    # module = FencingModule.objects.get(device_id=device_id)
+    # if request.method == "POST":
+    #     print(request.POST)
+    #     print(request.FILES)
+    # return render(request, 'geo/trackers.html')
+
+    logger.info('log info events')
+    logger.error('log error events')
+    print('print events')
+
+    return JsonResponse({'ok': 'ok'}, safe=False)
 
 def loads(request):
     context = {}
