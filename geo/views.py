@@ -191,14 +191,8 @@ def trackers(request):
 @csrf_exempt
 def events(request, device_id):
     # module = FencingModule.objects.get(device_id=device_id)
-    # if request.method == "POST":
-    #     print(request.POST)
-    #     print(request.FILES)
-    # return render(request, 'geo/trackers.html')
-
-    logger.info('log info events')
-    logger.error('log error events')
-    print('print events')
+    if request.method == "POST":
+        logger.info(request.POST)
 
     return JsonResponse({'ok': 'ok'}, safe=False)
 
