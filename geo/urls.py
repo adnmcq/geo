@@ -8,7 +8,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('trackers', views.trackers, name='trackers'),
     path('loads', views.loads, name='loads'),
-    path('events/<str:device_id>/', views.events, name='event'),
+    path('events/<str:device_id>', views.events, name='event'),
 
 
     url(r'^tracker/data/$', login_required(views.TrackerListJson.as_view()), name='tracker_list_json'),
