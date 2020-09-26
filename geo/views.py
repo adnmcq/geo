@@ -204,6 +204,7 @@ def events(request, device_id):
             rssi = device_data_dict.get('RSSI')
 
             logger.info('webhook POST %s %s %s %s' % (fencing_id, published_at, tracker_name, rssi))
+            # webhook POST e00fce68aadec91d27441ac2 2020-09-26T19:21:20.266Z iBeacon420 -56
 
             fencing_module = FencingModule.objects.get(device_id = fencing_id)
             tracker_chip = TrackerChip.objects.get(device_name = tracker_name)

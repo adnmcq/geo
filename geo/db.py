@@ -125,6 +125,7 @@ def b():
             fm, c = FencingModule.objects.get_or_create(
                 device_name=device_json['name'],
                 #created_date=created_date,
+                device_id=device_json['id'],
                 loc=loc,
             )
 
