@@ -115,7 +115,7 @@ def b():
             tc, c = TrackerChip.objects.get_or_create(
                 device_name=device_json['name'],
                 created_date=created_date,
-                tracker_id=device_json['id'],
+                device_id=device_json['id'],
                 client=cli
             )
         else:

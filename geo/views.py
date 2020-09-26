@@ -66,11 +66,11 @@ from django.utils.html import escape
 
 class TrackerListJson(BaseDatatableView):
     model = TrackerChip
-    columns = ['device_name', 'tracker_id', 'created_date']
+    columns = ['device_name', 'device_id', 'created_date']
     # define column names that will be used in sorting
     # order is important and should be same as order of columns displayed
     # non-sortable, use value like ''
-    order_columns = ['device_name', 'tracker_id', 'created_date']
+    order_columns = ['device_name', 'device_id', 'created_date']
     # set max limit of records returned, this is used to protect our site if someone tries to attack our site
     # and make it return huge amount of data
     max_display_length = 500
@@ -189,10 +189,20 @@ def trackers(request):
 ## SET UP FOR WEBHOOK. Webhook should post events to url: "/<device_id>"
 ## Need to add event data to database and map to correct fields
 @csrf_exempt
-def events(request, device_id):
+def events(request):#, device_id):
     # module = FencingModule.objects.get(device_id=device_id)
     if request.method == "POST":
-        logger.info(request.POST)
+        data = request.POST#logger.info(request.POST)
+
+        '''
+[26/Sep/2020 17:50:04,474] <QueryDict: {'event': ['tracking_event'], 
+'data': ['{ "DeviceName": "iBeacon420",   <----on the load TrackingChip.device_name
+"RSSI": -60 }'], 
+'published_at': ['2020-09-26T17:50:03.665Z'], 
+'coreid': ['e00fce68aadec91d27441ac2']}>   <-----on the side of the road  (where we are getting informatuon from)   FencingModule.device_id
+        '''
+
+        logger.info('webhook post type %s'%type(data))
 
     return JsonResponse({'ok': 'ok'}, safe=False)
 
