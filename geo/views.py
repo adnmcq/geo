@@ -189,7 +189,7 @@ def trackers(request):
 ## SET UP FOR WEBHOOK. Webhook should post events to url: "/<device_id>"
 ## Need to add event data to database and map to correct fields
 @csrf_exempt
-def events(request):#, device_id):
+def events(request, device_id):
     # module = FencingModule.objects.get(device_id=device_id)
     if request.method == "POST":
         data = request.POST#logger.info(request.POST)
