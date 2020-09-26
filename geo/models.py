@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 
-import requests
+import requests, datetime
 
 
 class Client(models.Model):
@@ -28,9 +28,9 @@ class FencingModule(models.Model): #Doesn't need any user auth since this will o
     They do not move. All 'event' data comes from fencing module
 
     '''
-    device_id = models.CharField(max_length=30)
+    device_id = models.CharField(max_length=30, unique=True)
     device_name = models.CharField(max_length=40)
-    created_date = models.DateTimeField()
+    created_date = models.DateTimeField(default= datetime.datetime.now())
     loc = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE)
     # city = models.CharField(max_length=30)
     # state = models.CharField(max_length=2)
@@ -41,9 +41,9 @@ class FencingModule(models.Model): #Doesn't need any user auth since this will o
         return '%s - %s'%(self.device_name, str(self.loc))
 
 class TrackerChip(models.Model): #User auth required.  Users should only be able to see their specific trackers
-    device_id = models.CharField(max_length=40, null=True, blank=True) #Unique ID labeled on the device - upload via qr code scanner
-    device_name = models.CharField(max_length=40, null=True, blank=True)
-    created_date = models.DateTimeField()
+    device_id = models.CharField(max_length=40, unique=True) #Unique ID labeled on the device - upload via qr code scanner
+    device_name = models.CharField(max_length=40, unique=True)
+    created_date = models.DateTimeField(default= datetime.datetime.now())
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.CASCADE)
     def __str__(self):
         return '%s - %s'%(self.device_id, self.device_name)

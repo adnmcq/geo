@@ -2,11 +2,13 @@ import os, platform
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "quiz.settings")
 
+
 import django
 django.setup()
 
 from django.conf import settings
 base_dir = settings.BASE_DIR
+
 
 from geo.models import *
 import configparser
@@ -114,7 +116,7 @@ def b():
         if 'Fencing' not in device_json['name']:
             tc, c = TrackerChip.objects.get_or_create(
                 device_name=device_json['name'],
-                created_date=created_date,
+                #created_date=created_date,
                 device_id=device_json['id'],
                 client=cli
             )
@@ -122,12 +124,9 @@ def b():
             loc = Location.objects.get(city='Chicago')
             fm, c = FencingModule.objects.get_or_create(
                 device_name=device_json['name'],
-                created_date=created_date,
+                #created_date=created_date,
                 loc=loc,
             )
-
-    # sid2 = transaction.savepoint()
-    # transaction.savepoint_commit(sid2)
 
     #Load
     origins = ['Temecula','Pueblo','Topeka']
@@ -142,22 +141,15 @@ def b():
             ref1_type='L',
             ref1=o[0:3]+d[0:3],
             orig=oo, dest=do,
-
-
         )
         if c:
             fm.tracker_chips.add(tracker)
 
-    #Trip
-
     fake.name()
-    # 'Lucy Cechtelar'
-
     fake.address()
 
     return 'ok'
 
 
 a()
-
 b()

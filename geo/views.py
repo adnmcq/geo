@@ -200,10 +200,18 @@ def events(request, device_id):
         device_data = data.get('data')
         if data and fencing_id and published_at:
             device_data_dict = json.loads(device_data)
-            device_name = device_data_dict.get('DeviceName')
+            tracker_name = device_data_dict.get('DeviceName')
             rssi = device_data_dict.get('RSSI')
 
-            logger.info('webhook post', fencing_id, published_at, device_name, rssi)
+            logger.info('webhook POST %s %s %s %s' % (fencing_id, published_at, tracker_name, rssi))
+
+            fencing_module = FencingModule.objects.get(device_id = fencing_id)
+            tracker_chip = TrackerChip.objects.get(device_name = tracker_name)
+
+            logger.info('MODELS %s %s %s %s'%(fencing_module.device_id, fencing_module.device_name,
+                                              tracker_chip.device_id, tracker_chip.device_name))
+
+
 
 
         '''
