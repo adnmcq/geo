@@ -195,7 +195,25 @@ def events(request, device_id):
         data = request.POST.dict()#logger.info(request.POST)
         logger.info(data)
 
+        fencing_id = data.get('coreid')
+        published_at = data.get('published_at')
+        device_data = data.get('data')
+        if data and fencing_id and published_at:
+            device_data_dict = json.loads(device_data)
+            device_name = device_data_dict.get('DeviceName')
+            rssi = device_data_dict.get('RSSI')
+
+            logger.info('webhook post', fencing_id, published_at, device_name, rssi)
+
+
         '''
+        
+         {'event': 'tracking_event', 
+         'data': '{ "DeviceName": "iBeacon420", "RSSI": -60 }', 
+         'published_at': '2020-09-26T18:35:47.942Z', 
+         'coreid': 'e00fce68aadec91d27441ac2'}
+         
+         
 [26/Sep/2020 17:50:04,474] <QueryDict: {'event': ['tracking_event'], 
 'data': ['{ "DeviceName": "iBeacon420",   <----on the load TrackingChip.device_name
 "RSSI": -60 }'], 
@@ -203,7 +221,7 @@ def events(request, device_id):
 'coreid': ['e00fce68aadec91d27441ac2']}>   <-----on the side of the road  (where we are getting informatuon from)   FencingModule.device_id
         '''
 
-        logger.info('webhook post type %s'%type(data))
+        # logger.info('webhook post type %s'%type(data))
 
     return JsonResponse({'ok': 'ok'}, safe=False)
 
