@@ -192,7 +192,8 @@ def trackers(request):
 def events(request, device_id):
     # module = FencingModule.objects.get(device_id=device_id)
     if request.method == "POST":
-        data = request.POST#logger.info(request.POST)
+        data = request.POST.dict()#logger.info(request.POST)
+        logger.info(data)
 
         '''
 [26/Sep/2020 17:50:04,474] <QueryDict: {'event': ['tracking_event'], 
