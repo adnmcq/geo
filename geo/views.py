@@ -207,7 +207,7 @@ def events(request, device_id):
             # webhook POST e00fce68aadec91d27441ac2 2020-09-26T19:21:20.266Z iBeacon420 -56
 
             fencing_module = FencingModule.objects.get(device_id = fencing_id)
-            tracker_chip = TrackerChip.objects.get(device_name = tracker_name)
+            tracker_chip, c = TrackerChip.objects.get_or_create(device_name = tracker_name)
 
             logger.info('MODELS %s %s %s %s'%(fencing_module.device_id, fencing_module.device_name,
                                               tracker_chip.device_id, tracker_chip.device_name))
