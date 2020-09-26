@@ -133,7 +133,8 @@ def b():
     origins = ['Temecula','Pueblo','Topeka']
     destinations = ['Abilene','Simi Valley','Fargo']
 
-    tracker = TrackerChip.objects.get(device_name= 'LTE-BeaconFinder1')
+    #THIS PART DONE IN WEBHOOK
+    # tracker = TrackerChip.objects.get(device_name= 'LTE-BeaconFinder1')
     for o, d in zip(origins, destinations):
         oo = Location.objects.get(city = o)
         do = Location.objects.get(city = d)
@@ -143,8 +144,9 @@ def b():
             ref1=o[0:3]+d[0:3],
             orig=oo, dest=do,
         )
-        if c:
-            fm.tracker_chips.add(tracker)
+        #THIS NEXT PART IS DONE IN WEBHOOK
+        # if c:
+        #     fm.tracker_chips.add(tracker)
 
     fake.name()
     fake.address()
