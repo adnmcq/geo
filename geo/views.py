@@ -201,13 +201,19 @@ def events(request, device_id):
         if data and fencing_id and published_at:
             device_data_dict = json.loads(device_data)
             tracker_name = device_data_dict.get('DeviceName')
+            tracker_id = device_data_dict.get('DeviceID')
             rssi = device_data_dict.get('RSSI')
 
-            logger.info('webhook POST %s %s %s %s' % (fencing_id, published_at, tracker_name, rssi))
+            logger.info('webhook POST %s %s %s %s %s' % (fencing_id,
+                                                         published_at,
+                                                         tracker_name,
+                                                         tracker_id,
+                                                         rssi))
             # webhook POST e00fce68aadec91d27441ac2 2020-09-26T19:21:20.266Z iBeacon420 -56
 
             fencing_module = FencingModule.objects.get(device_id = fencing_id)
-            tracker_chip, c = TrackerChip.objects.get_or_create(device_name = tracker_name)
+            tracker_chip, c = TrackerChip.objects.get_or_create(device_name = tracker_name,
+                                                                device_id = tracker_id)
 
             logger.info('MODELS %s %s %s %s'%(fencing_module.device_id, fencing_module.device_name,
                                               tracker_chip.device_id, tracker_chip.device_name))
