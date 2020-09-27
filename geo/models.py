@@ -2,7 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 
+from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN
+
 import requests, datetime
+import urllib.parse
 
 
 class Client(models.Model):
@@ -22,6 +25,43 @@ class Location(models.Model):
     def __str__(self):
         return '(%s, %s) %s, %s %s'%(self.lat, self.lon, self.city, self.state, self.zip)
 
+    def forward(self):
+        '''
+        Forward geocoding converts location text into geographic coordinates,
+        turning 2 Lincoln Memorial Circle NW into -77.050,38.889.
+        :return:
+        '''
+
+        search_string = urllib.parse.quote(self.city)#'Los%20Angeles'
+        url = "https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s"%(search_string, MAPBOX_ACCESS_TOKEN)
+        payload = {}
+        headers = {}
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+
+        # print(response.text.encode('utf8'))
+        text_response = response.text.encode('utf8')
+        return text_response
+
+    def reverse(self):
+        '''
+        Reverse geocoding turns geographic coordinates into place names, turning -77.050, 38.889 into 2 Lincoln Memorial Circle NW. These location names can vary in specificity,
+        from individual addresses to states and countries that contain the given coordinates.
+        :return:
+        '''
+
+        lat, lon = -73.989,40.733
+        url = "https://api.mapbox.com/geocoding/v5/mapbox.places/%s,%s.json?access_token=%s"%(lat, lon, MAPBOX_ACCESS_TOKEN)
+
+        payload = {}
+        headers = {}
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+
+        # print(response.text.encode('utf8'))
+        text_response = response.text.encode('utf8')
+        return text_response
+
 class FencingModule(models.Model): #Doesn't need any user auth since this will only be controlled by Admin
     '''
     These are the static 'central' scanners on the side of the highway.
@@ -32,11 +72,6 @@ class FencingModule(models.Model): #Doesn't need any user auth since this will o
     device_name = models.CharField(max_length=40)
     created_date = models.DateTimeField(default= datetime.datetime.now())
     loc = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE)
-    # city = models.CharField(max_length=30)
-    # state = models.CharField(max_length=2)
-    # zip_code = models.CharField(max_length=5)
-    # lat = models.DecimalField(max_digits=9, decimal_places=6)
-    # lon = models.DecimalField(max_digits=9, decimal_places=6)
     def __str__(self):
         return '%s - %s'%(self.device_name, str(self.loc))
 

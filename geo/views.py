@@ -30,9 +30,10 @@ import requests
 import configparser
 config = configparser.ConfigParser()
 config.read('conf.ini')
-MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
-PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
+# MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
+# PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
 
+from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -173,9 +174,17 @@ def logout_view(request):
 
 @login_required(login_url='/accounts/login/')
 def index(request):
-    logger.info('log info Im on the index')
-    logger.error('log error Im on the index')
-    print('print Im on the index')
+    # for loc in Location.objects.all():
+    #
+    #     city_data = Location.objects.get(city=loc.city).forward()
+    #     logger.info('location %s'%city_data)
+    #     print('location %s'%city_data)
+
+    # city_data = Location.objects.get(city='Chicago').reverse()
+    # logger.info('location %s'%city_data)
+    # print('location %s'%city_data)
+
+
     tracker_dict = {}
     context = {'devices': tracker_dict, 'mapbox_token': MAPBOX_ACCESS_TOKEN}
     return render(request, 'geo/index.html', context)

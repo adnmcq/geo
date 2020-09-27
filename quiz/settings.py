@@ -12,8 +12,18 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+import configparser
+
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+config = configparser.ConfigParser()
+config.read(os.path.join('conf.ini'))
+MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
+PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
+
 
 
 # Quick-start development settings - unsuitable for production
