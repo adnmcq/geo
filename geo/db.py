@@ -28,7 +28,7 @@ import datetime
 
 created_date=datetime.date.today()
 
-def a():
+def db():
     '''
     This is for creating stuff in db for testing
     :param request:
@@ -72,11 +72,13 @@ def a():
         print(city_row)
         city = i[1].strip()
         state = i[2].strip()
-        zipc = 22308#Faker.zip
+        zipc = None#Faker.zip
         location_string = city_row['Location']
         parts = location_string.split(' ')
         lat, lon = re.findall( r'\d+\.*\d*', parts[0])[0], \
                    re.findall( r'\d+\.*\d*', parts[1])[0]
+
+        lat, lon = float(lat), -1*float(lon)
         cit, c = Location.objects.get_or_create(
             city=city,
             state=state,
@@ -84,23 +86,11 @@ def a():
             lat=lat, lon=lon
         )
 
-    # sid = transaction.savepoint()
-    # transaction.savepoint_commit(sid)
-    # qs = Location.objects.all()
-    # for item in qs:
-    #     item.save()
-    # qs = TrackerChip.objects.all()
-    # for item in qs:
-    #     item.save()
+        # extra = cit.forward()
+        # extra2 = cit.reverse()
+
+
     #FencingModule
-    #TrackerChips
-
-
-def b():
-
-    cli= Client.objects.get(
-        user = User.objects.get(username='ksalette')
-    )
 
     url = "https://api.particle.io/v1/devices"
 
@@ -114,6 +104,7 @@ def b():
 
         print(device_json)
         if 'Fencing' not in device_json['name']:
+            #I don't think this hits, i think all 'devices' are FencingModules
             tc, c = TrackerChip.objects.get_or_create(
                 device_name=device_json['name'],
                 #created_date=created_date,
@@ -121,7 +112,8 @@ def b():
                 client=cli
             )
         else:
-            loc = Location.objects.get(city='Chicago')
+            city_name = device_json['name'].split('_')[1]
+            loc = Location.objects.get(city=city_name)
             fm, c = FencingModule.objects.get_or_create(
                 device_name=device_json['name'],
                 #created_date=created_date,
@@ -133,8 +125,8 @@ def b():
     origins = ['Temecula','Pueblo','Topeka']
     destinations = ['Abilene','Simi Valley','Fargo']
 
-    #THIS PART DONE IN WEBHOOK
-    # tracker = TrackerChip.objects.get(device_name= 'LTE-BeaconFinder1')
+    #CREATE SOME FAKE LOADS
+
     for o, d in zip(origins, destinations):
         oo = Location.objects.get(city = o)
         do = Location.objects.get(city = d)
@@ -147,9 +139,6 @@ def b():
         #THIS NEXT PART IS DONE IN WEBHOOK
         # if c:
         #     fm.tracker_chips.add(tracker)
-
-    fake.name()
-    fake.address()
 
     return 'ok'
 

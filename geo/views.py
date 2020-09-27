@@ -228,6 +228,14 @@ def events(request, device_id):
                                               tracker_chip.device_id, tracker_chip.device_name))
 
 
+            fake_load = Load.objects.all()[0]
+
+            fake_trip_to_update, c = Trip.objects.get_or_create(load = fake_load, tracker = tracker_chip,
+                                                                check_point = fencing_module)
+            fake_trip_to_update.check_point_time = published_at
+            fake_trip_to_update.save()
+
+
 
 
         '''

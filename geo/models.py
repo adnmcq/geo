@@ -6,7 +6,7 @@ from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN
 
 import requests, datetime
 import urllib.parse
-
+import json
 
 class Client(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -40,8 +40,9 @@ class Location(models.Model):
         response = requests.request("GET", url, headers=headers, data=payload)
 
         # print(response.text.encode('utf8'))
-        text_response = response.text.encode('utf8')
-        return text_response
+        dict_str = response.text
+        data = json.loads(dict_str)
+        return data
 
     def reverse(self):
         '''
@@ -50,8 +51,8 @@ class Location(models.Model):
         :return:
         '''
 
-        lat, lon = -73.989,40.733
-        url = "https://api.mapbox.com/geocoding/v5/mapbox.places/%s,%s.json?access_token=%s"%(lat, lon, MAPBOX_ACCESS_TOKEN)
+        lat, lon = self.lat, self.lon
+        url = "https://api.mapbox.com/geocoding/v5/mapbox.places/%s,%s.json?access_token=%s"%(lon, lat, MAPBOX_ACCESS_TOKEN)
 
         payload = {}
         headers = {}
@@ -59,8 +60,11 @@ class Location(models.Model):
         response = requests.request("GET", url, headers=headers, data=payload)
 
         # print(response.text.encode('utf8'))
-        text_response = response.text.encode('utf8')
-        return text_response
+        # text_response = response.text.encode('utf8')
+        # return text_response
+        dict_str = response.text
+        data = json.loads(dict_str)
+        return data
 
 class FencingModule(models.Model): #Doesn't need any user auth since this will only be controlled by Admin
     '''
