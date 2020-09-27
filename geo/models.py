@@ -77,7 +77,7 @@ class FencingModule(models.Model): #Doesn't need any user auth since this will o
     created_date = models.DateTimeField(default= datetime.datetime.now())
     loc = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE)
     def __str__(self):
-        return '%s - %s'%(self.device_name, str(self.loc))
+        return '%s - %s'%(self.device_name, str(self.loc.city))
 
 class TrackerChip(models.Model): #User auth required.  Users should only be able to see their specific trackers
     device_id = models.CharField(max_length=40, unique=True) #Unique ID labeled on the device - upload via qr code scanner
