@@ -143,5 +143,4 @@ def db():
     return 'ok'
 
 
-a()
-b()
+db()
