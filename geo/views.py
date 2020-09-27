@@ -219,8 +219,8 @@ def events(request, device_id):
                                                          rssi))
             # webhook POST e00fce68aadec91d27441ac2 2020-09-26T19:21:20.266Z iBeacon420 -56
 
-            fencing_module = FencingModule.objects.get(device_id = fencing_id)
-            tracker_chip, c = TrackerChip.objects.get_or_create(device_name = tracker_name,
+            fencing_module, c1 = FencingModule.objects.get_or_create(device_id = fencing_id)
+            tracker_chip, c2 = TrackerChip.objects.get_or_create(device_name = tracker_name,
                                                                 device_id = tracker_id)
 
             logger.info('MODELS %s %s %s %s'%(fencing_module.device_id, fencing_module.device_name,
@@ -229,7 +229,7 @@ def events(request, device_id):
 
             fake_load = Load.objects.all()[0]
 
-            fake_trip_to_update, c = Trip.objects.get_or_create(load = fake_load, tracker = tracker_chip,
+            fake_trip_to_update, c3 = Trip.objects.get_or_create(load = fake_load, tracker = tracker_chip,
                                                                 check_point = fencing_module)
             fake_trip_to_update.check_point_time = published_at
             fake_trip_to_update.save()
