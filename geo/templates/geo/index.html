@@ -72,6 +72,8 @@
 
 
 {% block js %}
+//COPY THIS FOR GETTING ROUTES
+//https://docs.mapbox.com/help/tutorials/getting-started-directions-api/
 
 var markers = [];
 var features = [];
@@ -127,9 +129,16 @@ $(document).on('change', '.trip_checkbox', function() {
 
     dest_lon=data_pt["dest_lon"];
     dest_lat=data_pt["dest_lat"];
+
+    orig_lon=data_pt["orig_lon"];
+    orig_lat=data_pt["orig_lat"];
+
+
     var dest_ll = new mapboxgl.LngLat(data_pt["dest_lon"], data_pt["dest_lat"]);
+    var orig_ll = new mapboxgl.LngLat(data_pt["orig_lon"], data_pt["orig_lat"]);
 
     features.push(dest_ll)
+    features.push(orig_ll)
     });
 
     drawMarkers(features)

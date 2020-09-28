@@ -121,6 +121,29 @@ class Load(models.Model):
     def __str__(self):
         return 'orig: %s \ndest: %s'%(str(self.orig), str(self.dest))
 
+    def directions(self):
+        url = "https://api.mapbox.com/matching/v5/mapbox/driving?access_token=%s"%MAPBOX_ACCESS_TOKEN
+
+        o, d = self.orig, self.dest
+
+        '''
+        payload = 'coordinates=-117.17282%2C32.71204%3B-117.17288%2C32.71225%3B-117.17293%2C32.71244%3B-117.17292%2C32.71256%3B-117.17298%2C32.712603%3B-117.17314%2C32.71259%3B-117.17334%2C32.71254'
+        '''
+
+        search_string = urllib.parse.quote("%s,%s;%s,%s"%(o.lon, o.lat, d.lon, d.lat))
+
+        payload = 'coordinates=%s'%search_string
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+
+        # print(response.text.encode('utf8'))
+        dict_str = response.text
+        data = json.loads(dict_str)
+        return data
+
 class Trip(models.Model):
     tracker = models.ForeignKey(TrackerChip, on_delete=models.CASCADE)
     load = models.ForeignKey(Load, on_delete=models.CASCADE)
