@@ -264,12 +264,20 @@ def loads(request):
 @csrf_exempt
 def add_trip_to_map(request):
     trip_id = request.POST['trip_id']
-    trip = Trip.objects.get(pk = trip_id)
-    orig, dest = trip.load.orig, trip.load.dest
-    data = {'orig_lat':str(orig.lat),
-            'orig_lon':str(orig.lon),
-            'dest_lat':str(dest.lat),
-            'dest_lon':str(dest.lon)}
+    trip_ids = json.loads(request.POST['trip_ids'])
+
+    data = []
+
+    for trip_id in trip_ids:
+
+        trip = Trip.objects.get(pk = trip_id)
+        orig, dest = trip.load.orig, trip.load.dest
+        data_pt = {'orig_lat':str(orig.lat),
+                'orig_lon':str(orig.lon),
+                'dest_lat':str(dest.lat),
+                'dest_lon':str(dest.lon)}
+        data.append(data_pt)
+
     return HttpResponse(json.dumps(data))
 
 

@@ -73,34 +73,80 @@
 
 {% block js %}
 
+var markers = [];
+var features = [];
+
+function drawMarkers(features){
+  clearMarkers();
+  features.forEach((feature) => {
+//features is a list of these var dest_ll = new mapboxgl.LngLat(data["dest_lon"], data["dest_lat"]);
+
+    let marker = new mapboxgl.Marker()
+      //.setLngLat(feature.geometry.coordinates)
+      //.setPopup(new mapboxgl.Popup()
+      //.setHTML(`<h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`))
+      .setLngLat(feature)
+      .addTo(map);
+    markers.push(marker)
+  });
+}
+
+
+function clearMarkers(){
+  markers.forEach((marker) => marker.remove());
+  markers = [];
+
+ // features.forEach((feature) => feature.remove());
+  features = [];
+}
+
 // $(<parent>).on('<event>', '<child>', callback);
 $(document).on('change', '.trip_checkbox', function() {
-    if(this.checked) {
+    //get all the checked checkboxes, get all of their trip_id
+    //pass these into view to get all of the lat,lon. This is features
+    //var checked_boxes = [];
+    var trip_ids = [];
+    $("input:checkbox[class=trip_checkbox]:checked").each(function(){
+    //checked_boxes.push($(this).val());
+    //console.log($(this).val());
+    trip_ids.push($(this).attr("id"));
+});
+
+
+   // if(this.checked) {
       // checkbox is checked
 
     var trip_id = $(this).attr("id");
-    console.log(trip_id);
 
-    $.post( "{% url 'add_trip_to_map' %}", { trip_id: trip_id }, function( data ) {
-console.log(data);
+
+    $.post( "{% url 'add_trip_to_map' %}", { trip_id: trip_id, trip_ids: JSON.stringify(trip_ids) }, function( data ) {
+
     data = JSON.parse(data);
-    //console.log(data["dest_lon"]);
 
-        dest_lon=data["dest_lon"];
-            dest_lat=data["dest_lat"];
+    data.forEach((data_pt) => {
 
+    dest_lon=data_pt["dest_lon"];
+    dest_lat=data_pt["dest_lat"];
+    var dest_ll = new mapboxgl.LngLat(data_pt["dest_lon"], data_pt["dest_lat"]);
 
-    var dest_ll = new mapboxgl.LngLat(data["dest_lon"], data["dest_lat"]);
-console.log(dest_ll)
-    var marker = new mapboxgl.Marker()
-.setLngLat(dest_ll)
-.addTo(map);
+    features.push(dest_ll)
+    });
+
+    drawMarkers(features)
+
 
 
 });
 
-
+/*
     } //end if checked
+    else {
+  //  Somehow remove
+    clearMarkers()
+
+}
+*/
+
 });
 
 //map stuff
