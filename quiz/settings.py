@@ -24,14 +24,14 @@ config.read(os.path.join(BASE_DIR,'conf.ini'))
 MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
 PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
 MAPBOX_NO_LIMIT_ACCESS_TOKEN = config['TOKENS']['mapboxnolimit'] if not os.environ.get('MAPBOX_NO_LIMIT_ACCESS_TOKEN') else os.environ.get('MAPBOX_NO_LIMIT_ACCESS_TOKEN')
-
-
+GOOGLE_MAPS = config['TOKENS']['googlemaps'] if not os.environ.get('GOOGLE_MAPS') else os.environ.get('GOOGLE_MAPS')
+SECRET_KEY = config['TOKENS']['django_secret'] if not os.environ.get('DJANGO_SECRET') else os.environ.get('DJANGO_SECRET')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '*bgt*o2$+8l=8q8!^tqkgd+r%@$2a6a@exat$v)bh0qryfm)$9'
+# SECRET_KEY = '*bgt*o2$+8l=8q8!^tqkgd+r%@$2a6a@exat$v)bh0qryfm)$9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
