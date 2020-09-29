@@ -72,8 +72,7 @@
 
 
 {% block js %}
-//COPY THIS FOR GETTING ROUTES
-//https://docs.mapbox.com/help/tutorials/getting-started-directions-api/
+
 
 var markers = [];
 var features = [];
@@ -106,23 +105,25 @@ function clearMarkers(){
 $(document).on('change', '.trip_checkbox', function() {
     //get all the checked checkboxes, get all of their trip_id
     //pass these into view to get all of the lat,lon. This is features
-    //var checked_boxes = [];
+
+
     var trip_ids = [];
+
     $("input:checkbox[class=trip_checkbox]:checked").each(function(){
-    //checked_boxes.push($(this).val());
-    //console.log($(this).val());
     trip_ids.push($(this).attr("id"));
 });
 
 
-   // if(this.checked) {
-      // checkbox is checked
 
-    var trip_id = $(this).attr("id");
+    var trip_id = $(this).attr("id");  //prob not needed
 
 
     $.post( "{% url 'add_trip_to_map' %}", { trip_id: trip_id, trip_ids: JSON.stringify(trip_ids) }, function( data ) {
 
+
+    //each element of data list is (start, stop, route_geometry_json
+    // route geometry json comes from a GET to mapbox API in Trip model method
+    //will try and save/cache this data due to API restrictions
     data = JSON.parse(data);
 
     data.forEach((data_pt) => {
@@ -139,24 +140,86 @@ $(document).on('change', '.trip_checkbox', function() {
 
     features.push(dest_ll)
     features.push(orig_ll)
+
+    trip_routes_data=data_pt["trip_routes_data"];
+
+    //COPY THIS FOR GETTING ROUTES
+//https://docs.mapbox.com/help/tutorials/getting-started-directions-api/
+//USE THIS TO CIRCUMVENT API LIMITATIONS
+//https://docs.mapbox.com/help/demos/how-mapbox-works/how-directions-works.html
+
+
+    /*
+  var start = [-122.662323, 45.523751];
+  var url = 'https://api.mapbox.com/directions/v5/mapbox/cycling/' + start[0] + ',' + start[1] + ';' + end[0] + ',' + end[1] + '?steps=true&geometries=geojson&access_token=' + mapboxgl.accessToken;
+
+  // make an XHR request https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+  var req = new XMLHttpRequest();
+  req.open('GET', url, true);
+  req.onload = function() {
+    var json = JSON.parse(req.response);  */
+
+
+    var trip_route_data = trip_routes_data.routes[0];
+    console.log(trip_route_data);
+    var route = trip_route_data.geometry.coordinates;
+    var geojson = {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: route
+      }
+    };  //end geojson
+    // if the route already exists on the map, reset it using setData
+    if (map.getSource('route')) {
+      map.getSource('route').setData(geojson);
+    console.log('routw existed');
+    } else { // otherwise, make a new request
+    console.log('routw didnt existed');
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: geojson
+            }
+          }
+        },
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#3887be',
+          'line-width': 5,
+          'line-opacity': 0.75
+        }
+      });
+    }
+    // add turn instructions here at the end
+//  };  req onload
+  //req.send();
+//}
+
+
+
     });
 
     drawMarkers(features)
 
 
 
-});
+});  //end .$post
 
-/*
-    } //end if checked
-    else {
-  //  Somehow remove
-    clearMarkers()
 
-}
-*/
 
-});
+}); //end checkbox change
 
 //map stuff
         mapboxgl.accessToken = '{{ mapbox_token }}';

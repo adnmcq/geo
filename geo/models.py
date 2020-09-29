@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 
-from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN
+from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN, MAPBOX_NO_LIMIT_ACCESS_TOKEN
 
 import requests, datetime
 import urllib.parse
@@ -140,6 +140,38 @@ class Load(models.Model):
         response = requests.request("POST", url, headers=headers, data=payload)
 
         # print(response.text.encode('utf8'))
+        dict_str = response.text
+        data = json.loads(dict_str)
+        return data
+
+    def no_limit_directions(self):
+
+        o, d = self.orig, self.dest
+
+
+        search_string = urllib.parse.quote("%s,%s;%s,%s"%(o.lon, o.lat, d.lon, d.lat))
+
+        #-118.243908%2C34.05487%3B-73.980715%2C40.764916
+
+        #switch from geometries=polyline to geojson
+        url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s"%(search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
+
+        # url = "https://api.mapbox.com/directions/v5/mapbox/driving/-118.243908%2C34.05487%3B-73.980715%2C40.764916.json?geometries=polyline&alternatives=true&steps=true&overview=full&access_token=pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p0MG01MXRqMW45cjQzb2R6b2ptc3J4MSJ9.zA2W0IkI0c6KaAhJfk9bWg"
+
+        payload = {}
+        headers = {
+            'Connection': 'keep-alive',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
+            'Accept': '*/*',
+            'Origin': 'https://docs.mapbox.com',
+            'Sec-Fetch-Site': 'same-site',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Dest': 'empty',
+            'Referer': 'https://docs.mapbox.com/',
+            'Accept-Language': 'en-US,en;q=0.9'
+        }
+
+        response = requests.request("GET", url, headers=headers, data=payload)
         dict_str = response.text
         data = json.loads(dict_str)
         return data

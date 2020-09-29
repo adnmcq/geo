@@ -33,7 +33,7 @@ config.read('conf.ini')
 # MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
 # PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
 
-from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN
+from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN, MAPBOX_NO_LIMIT_ACCESS_TOKEN
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -271,11 +271,14 @@ def add_trip_to_map(request):
     for trip_id in trip_ids:
 
         trip = Trip.objects.get(pk = trip_id)
+
+        directions = trip.load.no_limit_directions()
         orig, dest = trip.load.orig, trip.load.dest
         data_pt = {'orig_lat':str(orig.lat),
                 'orig_lon':str(orig.lon),
                 'dest_lat':str(dest.lat),
-                'dest_lon':str(dest.lon)}
+                'dest_lon':str(dest.lon),
+                   "trip_routes_data":directions  }
         data.append(data_pt)
 
     return HttpResponse(json.dumps(data))

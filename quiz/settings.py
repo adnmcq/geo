@@ -23,6 +23,7 @@ config = configparser.ConfigParser()
 config.read(os.path.join(BASE_DIR,'conf.ini'))
 MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
 PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
+MAPBOX_NO_LIMIT_ACCESS_TOKEN = config['TOKENS']['mapboxnolimit'] if not os.environ.get('MAPBOX_NO_LIMIT_ACCESS_TOKEN') else os.environ.get('MAPBOX_NO_LIMIT_ACCESS_TOKEN')
 
 
 
