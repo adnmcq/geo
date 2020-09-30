@@ -105,15 +105,36 @@ function drawRoutes(){
 
 
 
-var geojson_elementS = [];  //NEED TO FIGURE THIS OUT
+//map.addSource('routes', {
 
+var fc = {
+'type': 'geojson',
+'data': {
+'type': 'FeatureCollection',
+'features': [],
+}};
+
+
+//fc.data.features.push();
+//console.log(fc.data.features);
+
+
+
+
+//var geojson_elementS = [];  //NEED TO FIGURE THIS OUT
+var route=[];//only need to initialize here for debug reasons
 vroutes.forEach((_route) => {
-console.log('aaa');   //this is cumulative because i'm not clearing vroutes, but if I clearvroutes, nothing happens
 
 var trip_route_data = _route.routes[0];
 
     //console.log(trip_route_data);
     var route = trip_route_data.geometry.coordinates;
+console.log(route[0]);
+//geojson_elementS.push(route);
+
+
+
+
     var geojson = {
       type: 'Feature',
       properties: {},
@@ -123,26 +144,35 @@ var trip_route_data = _route.routes[0];
       }
     };  //end geojson
 
+fc.data.features.push(geojson);
 
-    if (map.getSource('route')) {
-      map.getSource('route').setData(geojson);
+}); //end foreach
+
+
+    if (map.getSource('all_routes_geojson_id')) {
+      map.getSource('all_routes_geojson_id').setData(fc.data);   //setData(geojson);
     console.log('route existed');
     } else {
     console.log('route didnt exist');
      let route_marker = map.addLayer({
-        id: 'route',
+        id: 'all_routes_geojson_id',
         type: 'line',
         source: {
+
+
           type: 'geojson',
           data: {
+
             type: 'Feature',
             properties: {},
             geometry: {
               type: 'LineString',
-              coordinates: geojson
+              coordinates: []
             }
-          }
-        },
+          }  //data
+
+
+        },   //source
         layout: {
           'line-join': 'round',
           'line-cap': 'round'
@@ -154,11 +184,15 @@ var trip_route_data = _route.routes[0];
         }
       });
 
-    map.getSource('route').setData(geojson); //added
-    route_markers.push(route_marker);
+
+console.log(fc.data);
+    map.getSource('all_routes_geojson_id').setData(fc.data);   //setData(geojson);
+
+
+    //route_markers.push(route_marker);
     }   //end else
 
-});  //end vroutes _foreach
+//});  //MOVE THE DRAWING OF ROUTES OUTSIDE OF FOREACH//end vroutes _foreach
 
 
  clearRoutes();
@@ -250,11 +284,6 @@ $(document).on('change', '.trip_checkbox', function() {
           zoom: 3
         });
 
-        {% for key, value in devices.items %}
-        var {{key}} = new mapboxgl.Marker()
-          .setLngLat([{{ value.CheckPoint_Location.4 }}, {{ value.CheckPoint_Location.3 }}])
-          .addTo(map);
-        {% endfor %}
 
 // datatables
     var oTable = $('#trackers').dataTable({
