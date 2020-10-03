@@ -33,7 +33,7 @@ config.read('conf.ini')
 # MAPBOX_ACCESS_TOKEN = config['TOKENS']['mapbox'] if not os.environ.get('MAPBOX_ACCESS_TOKEN') else os.environ.get('MAPBOX_ACCESS_TOKEN')
 # PARTICLE_ACCESS_TOKEN = config['TOKENS']['particle'] if not os.environ.get('PARTICLE_ACCESS_TOKEN') else os.environ.get('PARTICLE_ACCESS_TOKEN')
 
-from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN, MAPBOX_NO_LIMIT_ACCESS_TOKEN
+from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN, MAPBOX_NO_LIMIT_ACCESS_TOKEN, BASE_DIR
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -44,6 +44,11 @@ from django.utils.html import escape
 import logging
 logger = logging.getLogger('django.server')
 
+
+import geojson
+from geojson import Feature, Point, FeatureCollection, LineString, MultiLineString
+import pandas as pd
+import numpy as np
 
 
 # from spyrk import SparkCloud
@@ -284,32 +289,208 @@ def add_trip_to_map(request):
     return HttpResponse(json.dumps(data))
 
 
-def api(request):
+
+#OPTIMIZE?
+
+
+@login_required(login_url='/accounts/login/')
+def index2(request):
+
+    tracker_dict = {}
+    context = {'devices': tracker_dict, 'mapbox_token': MAPBOX_ACCESS_TOKEN}
+    return render(request, 'geo/index2.html', context)
+
+@csrf_exempt
+def add_trip_to_map2(request):
+    trip_id = request.POST['trip_id']
+    trip_ids = json.loads(request.POST['trip_ids'])
+
+    data = []
+    endpoint_dump = []
+
+    features = []
+
+    for trip_id in trip_ids:
+
+        trip = Trip.objects.get(pk = trip_id)
+
+        directions = trip.load.no_limit_directions()
+        coordinates = directions['routes'][0]['geometry']['coordinates']
+
+        orig, dest = trip.load.orig, trip.load.dest
+
+        # orig_point_feature = Feature(geometry=Point((str(orig.lat), str(orig.lon))))
+        # dest_point_feature = Feature(geometry=Point((str(dest.lat), str(dest.lon))))
+
+        # orig_point_feature = Feature(geometry=Point((float(orig.lon), float(orig.lat))))
+        # dest_point_feature = Feature(geometry=Point((float(dest.lon), float(dest.lat))))
+
+
+        # orig_point_feature = Feature(geometry=Point((43.24, -1.532)))
+        # dest_point_feature = Feature(geometry=Point((43.24, -1.532)))
+
+
+
+        trip_route = Feature(geometry=LineString(coordinates))#[(8.919, 44.4074), (8.923, 44.4075)])
+
+        # features.append(orig_point_feature)
+        # features.append(dest_point_feature)
+        features.append(trip_route)
+
+
+        # data_pt = {'orig_lat':str(orig.lat),
+        #         'orig_lon':str(orig.lon),
+        #         'dest_lat':str(dest.lat),
+        #         'dest_lon':str(dest.lon),
+        #            "trip_routes_data":directions  }
+        # data.append(data_pt)
+
+        coord = {'orig_lat':str(orig.lat),
+                'orig_lon':str(orig.lon),
+                'dest_lat':str(dest.lat),
+                'dest_lon':str(dest.lon)}
+        endpoint_dump.append(coord)
+
+    feature_collection = FeatureCollection(features)
+    # feature_dump = geojson.dumps(feature_collection)#, sort_keys=True)
+
+    return HttpResponse(json.dumps({'endpoints': endpoint_dump, 'features': feature_collection}))#json.dumps(feature_collection))
+
+
+
+@csrf_exempt
+def add_fencing(request):
     '''
-    This is for testing api stuff
+    Flying V/ Pilot locations.csv
+
+    > GET THE TRIP IDS, COMPARE DIRECTIONS COORDINATES TO FENCING MODULES, ONLY RETAIN COORDINATES THAT ARE ON OR CLOSE TO ROOT EUCLIDIAN DISTANCE
+
+    Might be able to get other locations from http://www.poi-factory.com/ , etc
     :param request:
     :return:
     '''
+    truck_stop_df = pd.read_csv(os.path.join(BASE_DIR, 'locations.csv'))
+    marker_dump = []
 
-    #https://docs.mapbox.com/api/search/#geocoding
 
-    url = "https://api.particle.io/v1/devices"
-
-    payload = {}
-    headers = {
-        'Authorization': 'Bearer %s'%PARTICLE_ACCESS_TOKEN
-    }
-
-    devices_response = requests.request("GET", url, headers=headers, data=payload)
-    for device_json in devices_response.json():
-
-        print(device_json['name'], device_json)
+    trip_ids = json.loads(request.POST['trip_ids'])
 
 
 
-    print(devices_response.text.encode('utf8'))
+    for trip_id in trip_ids:
 
-    return JsonResponse(devices_response.json(), safe=False)
+        trip = Trip.objects.get(pk = trip_id)
+
+        directions = trip.load.no_limit_directions()
+        route_coordinates = directions['routes'][0]['geometry']['coordinates']
+
+
+        # for i, loc in enumerate(truck_stop_df.values):
+        #
+        #     # print(loc)
+        #
+        #     lat, lon = loc[7], loc[8]
+        #
+        #     coord = {'lat':str(lat),
+        #             'lon':str(lon),
+        #            }
+        #
+        #     if 1:#is_on_route(route_coordinates, coord):
+        #         marker_dump.append(coord)
+        #         # print(i)
+
+        s = pd.Series([(loc[7], loc[8]) for loc in truck_stop_df.values])
+
+        # print('s before %s'%len(s))
+
+        s.apply(is_on_route_inline, args=(route_coordinates,))
+
+        # print(s)
+
+
+        # feature_collection = FeatureCollection(features)
+        # feature_dump = geojson.dumps(feature_collection)#, sort_keys=True)
+
+    return HttpResponse(json.dumps({'markers': marker_dump}))#json.dumps(feature_collection))
+
+'''
+
+def subtract_custom_value(x, custom_value):
+    return x - custom_value
+    
+s.apply(subtract_custom_value, args=(5,))
+
+
+London      15
+New York    16
+Helsinki     7
+dtype: int64
+'''
+
+
+def is_on_route_inline(x, route_coordinates):
+    '''
+
+    :param route_coordinates:
+    :param fencing_module_coordinate:
+    :return: True if on route else False
+    '''
+
+    lat, lon = x[0], x[1]
+
+
+    # coord = {'lat': str(lat),
+    #          'lon': str(lon),
+    #          }
+
+    rcs = route_coordinates
+
+    fcmlat, fcmlon = float(lat), float(lon)
+
+    # dist = np.sqrt(np.sum([(fcmlat - b[0]) * (fcmlon - b[1]) for b in route_coordinates]))
+
+    a = np.array((fcmlat, fcmlon))
+    bs = [np.array((c[1], c[0])) for c in rcs]
+
+
+    def distance_inline(b, fcm_point):
+        return np.linalg.norm(b-fcm_point)
+
+    bss = pd.Series(bs)
+    distances = bss.apply(distance_inline, args=(a,))   #np.linalg.norm(a-b))
+
+    # distances = [np.linalg.norm(a-b) for b in bs]
+
+    if min(distances)<0.1:
+        print(x)
+        return True
+
+    return False
+
+
+def is_on_route(route_coordinates, fencing_module_coordinate):
+    '''
+
+    :param route_coordinates:
+    :param fencing_module_coordinate:
+    :return: True if on route else False
+    '''
+    rcs, fcm = route_coordinates, fencing_module_coordinate
+
+    fcmlat, fcmlon = float(fcm['lat']), float(fcm['lon'])
+
+    # dist = np.sqrt(np.sum([(fcmlat - b[0]) * (fcmlon - b[1]) for b in route_coordinates]))
+
+    a = np.array((fcmlat, fcmlon))
+    bs = [np.array((c[1], c[0])) for c in rcs]
+
+    distances = [np.linalg.norm(a-b) for b in bs]
+
+    if min(distances)<0.1:
+        return True
+
+    return False
+
 
 
 

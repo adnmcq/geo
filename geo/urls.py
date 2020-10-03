@@ -17,7 +17,13 @@ urlpatterns = [
 
     path('add_trip_to_map', views.add_trip_to_map, name='add_trip_to_map'),
 
-    #for testing
-    path('api', views.api, name='api'),
+
+    #OPTIMIZE?
+    path('2', views.index2, name='index2'),
+    path('add_trip_to_map2', views.add_trip_to_map2, name='add_trip_to_map2'),
+
+    #add_fencing
+    path('add_fencing', views.add_fencing, name='add_fencing'),
+
 
 ]
