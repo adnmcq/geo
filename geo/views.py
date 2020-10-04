@@ -385,19 +385,19 @@ def add_fencing(request):
         route_coordinates = directions['routes'][0]['geometry']['coordinates']
 
 
-        # for i, loc in enumerate(truck_stop_df.values):
-        #
-        #     # print(loc)
-        #
-        #     lat, lon = loc[7], loc[8]
-        #
-        #     coord = {'lat':str(lat),
-        #             'lon':str(lon),
-        #            }
-        #
-        #     if 1:#is_on_route(route_coordinates, coord):
-        #         marker_dump.append(coord)
-        #         # print(i)
+        for i, loc in enumerate(truck_stop_df.values):
+
+            # print(loc)
+
+            lat, lon = loc[7], loc[8]
+
+            coord = {'lat':str(lat),
+                    'lon':str(lon),
+                   }
+
+            if 1:#is_on_route(route_coordinates, coord):
+                marker_dump.append(coord)
+                # print(i)
 
         s = pd.Series([(loc[7], loc[8]) for loc in truck_stop_df.values])
 
