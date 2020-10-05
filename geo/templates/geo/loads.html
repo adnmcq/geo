@@ -2,65 +2,73 @@
 
 {% block content %}
  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Manage Loads</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group mr-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
-          </div>
-          <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
-            <span data-feather="calendar"></span>
-          </button>
+        <h1 class="h2">Loads</h1>
 
-        </div>
+
+
       </div>
 
-      <h2>Active Loads</h2>
-      <div class="table-responsive">
-        <table class="table table-striped table-sm">
-          <thead>
+        <div id='map' style='width: 100%; height: 380px;'></div>
+
+      <h2>Trips</h2>
+<table id="loads" class="display" style="width:100%">
+        <thead>
             <tr>
-              <th></th>
-              <th>Load ID</th>
-              <th>Origin</th>
-              <th>Destination</th>
-              <th>Reference 1</th>
-              <th>Reference 2</th>
-              <th>Reference 3</th>
-              <th>Assigned Date</th>
-              <th>Last Known Location</th>
-              <th>Last Update</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for key, value in devices.items %}
-                <tr>
-                    <td><a class="nav-link" href="#"><span data-feather="globe"></span></a></td>
-                    <td>{{ value.CheckPoint_DeviceID }}</td>
-                    <td>{{ key }}</td>
-                    <td>{{ value.Time }}</td>
-                    <td>{{ value.CheckPoint_Location.0 }}, {{ value.CheckPoint_Location.1 }} {{ value.CheckPoint_Location.2 }}</td>
-                    <td>{{ value.CheckPoint_Location.3 }}, {{ value.CheckPoint_Location.4 }}</td>
-                    <td>{% if value.Load_ID %} {{ value.Load_ID }} {% else %} None {% endif %}</td>
-                </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+                <th>Tracker</th>
 
-      <h2>Add/ Manage Loads</h2>
-      <div class="table-responsive">
-        <table class="table table-striped table-sm">
-          <thead>
-            <tr>
-                <th></th>
+                <th>Origin</th>
+                <th>Destination</th>
+                <th>Last Check</th>
+                <th>Check Time</th>
+                <th>Active</th>
+
             </tr>
-          </thead>
-          <tbody>
-                <tr>
-                    <td></td>
-                </tr>
-          </tbody>
-        </table>
+        </thead>
+        <tbody>
+        </tbody>
+
+
+    </table>
+
+
+
+      <h2>Trackers</h2>
+<table id="trackers" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>DeviceName</th>
+                <th>TrackerId</th>
+                <th>CreatedDt</th>
+
+
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+
+
+
+    </table>
+
+
       </div>
+{% endblock %}
+
+
+{% block js %}
+
+
+// datatables
+    var oTable = $('#loads').dataTable({
+        // ...
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{% url 'load_list_json' %}"
+    });
+    // ...
+
+
+
+
+
 {% endblock %}

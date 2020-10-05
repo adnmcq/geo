@@ -3,14 +3,17 @@
 {% block content %}
  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Overview</h1>
-
-
-
       </div>
+
+
+<div id="accordion">
+  <h3>Trips</h3>
+  <div>
+    <p>
 
         <div id='map' style='width: 100%; height: 380px;'></div>
 
-      <h2>Trips</h2>
+      <!--<h2>Trips</h2>-->
 <table id="trips" class="display" style="width:100%">
         <thead>
             <tr>
@@ -31,8 +34,16 @@
     </table>
 
 
+          </p>
+  </div>
 
-      <h2>Trackers</h2>
+
+  <h3>Trackers</h3>
+  <div>
+    <p>
+
+
+      <!--<h2>Trackers</h2>-->
 <table id="trackers" class="display" style="width:100%">
         <thead>
             <tr>
@@ -51,7 +62,19 @@
     </table>
 
 
-      </div>
+      <!--https://stackoverflow.com/questions/36003670/how-to-put-a-link-on-a-button-with-bootstrap-->
+      <a href="{% url 'tracker' %}" class="btn btn-info" role="button">Add Tracker</a>
+
+          </p>
+  </div>
+        <h3>Loads</h3>
+  <div>
+    <p>
+
+    </p>
+  </div>
+
+      </div>  <!-- Accordian -->
 {% endblock %}
 
 
@@ -260,6 +283,14 @@ console.log('MAP LOADED');
     });
     // ...
 
+    var oTable = $('#loads').dataTable({
+        // ...
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{% url 'load_list_json' %}"
+    });
+    // ...
+
     var oTable2 = $('#trips').dataTable({
         // ...
         "processing": true,
@@ -267,6 +298,11 @@ console.log('MAP LOADED');
         "ajax": "{% url 'trip_list_json' %}"
     });
     // ...
+
+
+// Accordian
+
+$( "#accordion" ).accordion();
 
 
 

@@ -7,3 +7,4 @@ django-datatables-view
 Faker
 pandas
 geojson
+scipy
