@@ -33,7 +33,7 @@
 
     </table>
 
-
+    <a href="{% url 'trip' %}" class="btn btn-info" role="button">Add Trip</a>
           </p>
   </div>
 
@@ -67,12 +67,12 @@
 
           </p>
   </div>
-        <h3>Loads</h3>
-  <div>
-    <p>
+        <!--<h3>Loads</h3>-->
+  <!--<div>-->
+    <!--<p>-->
 
-    </p>
-  </div>
+    <!--</p>-->
+  <!--</div>-->
 
       </div>  <!-- Accordian -->
 {% endblock %}
@@ -283,12 +283,12 @@ console.log('MAP LOADED');
     });
     // ...
 
-    var oTable = $('#loads').dataTable({
+  /*  var oTable = $('#loads').dataTable({
         // ...
         "processing": true,
         "serverSide": true,
-        "ajax": "{% url 'load_list_json' %}"
-    });
+        "ajax": "{ url 'load_list_json' %}"
+    });  */
     // ...
 
     var oTable2 = $('#trips').dataTable({

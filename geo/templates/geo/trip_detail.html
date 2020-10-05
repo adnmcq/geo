@@ -17,12 +17,13 @@
 
 
 
-      <h2>Add/ Edit Tracker Chip</h2>
+      <h2>Add/ Edit Trip</h2>
 
       <form method="POST" action="">
     {% csrf_token %}
 
-                    {% for hidden in form.hidden_fields %}
+
+          {% for hidden in form.hidden_fields %}
     {{ hidden }}
 {% endfor %}
 

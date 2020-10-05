@@ -66,9 +66,6 @@ from scipy.spatial import distance_matrix
 #                                                    }
 # print(tracker_dict)
 
-
-
-
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.utils.html import escape
 
@@ -113,23 +110,6 @@ class TrackerListJson(BaseDatatableView):
             ])
         return json_data
 
-
-class LoadListJson(BaseDatatableView):
-    model = Load
-    columns = ['ref1_type', 'ref1', 'orig', 'dest']
-
-    order_columns = ['ref1_type', 'ref1', 'orig', 'dest']
-    max_display_length = 500
-
-    def render_column(self, row, column):
-        return super(LoadListJson, self).render_column(row, column)
-
-    def filter_queryset(self, qs):
-        # use parameters passed in GET request to filter queryset
-        search = self.request.GET.get('search[value]', None)
-        if search:
-            qs = qs.filter(ref1__istartswith=search)
-        return qs
 
 
 class TripListJson(BaseDatatableView):
@@ -193,6 +173,25 @@ class TripListJson(BaseDatatableView):
                 item.active if item.active else '',
             ])
         return json_data
+
+
+
+# class LoadListJson(BaseDatatableView):
+#     model = Load
+#     columns = ['ref1_type', 'ref1', 'orig', 'dest']
+#
+#     order_columns = ['ref1_type', 'ref1', 'orig', 'dest']
+#     max_display_length = 500
+#
+#     def render_column(self, row, column):
+#         return super(LoadListJson, self).render_column(row, column)
+#
+#     def filter_queryset(self, qs):
+#         # use parameters passed in GET request to filter queryset
+#         search = self.request.GET.get('search[value]', None)
+#         if search:
+#             qs = qs.filter(ref1__istartswith=search)
+#         return qs
 
 
 def logout_view(request):
@@ -279,19 +278,38 @@ def events(request, device_id):
 
 
 
-def loads(request):
-    context = {}
-    return render(request, 'geo/loads.html', context)
+# def loads(request):
+#     context = {}
+#     return render(request, 'geo/loads.html', context)
+#
+#
+# def trackers(request):
+#     context = {}
+#     return render(request, 'geo/trackers.html', context)
 
 
-def trackers(request):
-    context = {}
-    return render(request, 'geo/trackers.html', context)
+def trip(request, d_id=None):
+    # if this is a POST request we need to process the form data
+    if d_id:
+        trip_obj = Trip.objects.get(pk=d_id)
+    else:
+        trip_obj = None
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = TripForm(request.POST, instance=trip_obj)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            saved = form.save()
+            return HttpResponseRedirect(reverse('tracker', args=[saved.id]))
 
-
-def load(request, d_id):
-    context = {}
-    return render(request, 'geo/loads.html', context)
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = TripForm(instance=trip_obj)
+    context = {'trip': trip_obj, 'form': form}
+    return render(request, 'geo/trip_detail.html', context)
 
 
 def tracker(request, d_id=None):
@@ -304,6 +322,10 @@ def tracker(request, d_id=None):
         # create a form instance and populate it with data from the request:
         form = TrackerForm(request.POST, instance=tracker_obj)
         # check whether it's valid:
+        if not tracker_obj:
+            client = Client.objects.get(user = request.user)
+            form.fields['client_id'].initial = client.id
+
         if form.is_valid():
             # process the data in form.cleaned_data as required
             # ...
