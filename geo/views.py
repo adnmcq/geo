@@ -134,10 +134,11 @@ class LoadListJson(BaseDatatableView):
 
 class TripListJson(BaseDatatableView):
     model = Trip
+    #AJAX error w orig dest
     columns = ['tracker', 'orig','dest', 'check_point',
                'check_point_time', 'active']
 
-    order_columns = ['tracker', 'orig','dest', 'check_point',
+    order_columns = ['tracker', '','', 'check_point',
                'check_point_time', 'active']
     max_display_length = 500
 
