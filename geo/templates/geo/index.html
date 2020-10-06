@@ -81,7 +81,6 @@ function drawMarkers(features){
   features.forEach((feature) => {
 
     let marker = new mapboxgl.Marker()
-
       .setLngLat(feature)
       .addTo(map);
     markers.push(marker)
@@ -129,7 +128,7 @@ var trip_route_data = _route.routes[0];
 
     //console.log(trip_route_data);
     var route = trip_route_data.geometry.coordinates;
-console.log(route[0]);
+//console.log(route[0]);  route is the list of coordinates of the linesring
 //geojson_elementS.push(route);
 
 

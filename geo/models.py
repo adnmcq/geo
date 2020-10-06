@@ -183,7 +183,7 @@ class Trip(models.Model):
     check_point = models.ForeignKey(FencingModule, on_delete=models.CASCADE, null=True, blank=True)
     check_point_time = models.DateTimeField(null=True, blank=True)
 
-    active = models.NullBooleanField()
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return 'load: %s \ntracker: %s'%(self.load.id, str(self.tracker))
