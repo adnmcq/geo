@@ -296,8 +296,15 @@ def trip(request, d_id=None):
         trip_obj = None
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = TripForm(request.POST, instance=trip_obj)
+        form = TripForm(request.POST, instance=trip_obj, user = request.user)
         # check whether it's valid:
+
+        if not trip_obj:
+            client = Client.objects.get(user = request.user)
+            form.fields['client_id'].initial = client.id
+
+            #SOME MORE LOGIC TO CREATE THE LOAD, SELECT THE TRACKERS AND MAKE THE M2M rels
+
         if form.is_valid():
             # process the data in form.cleaned_data as required
             # ...
@@ -307,7 +314,7 @@ def trip(request, d_id=None):
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = TripForm(instance=trip_obj)
+        form = TripForm(instance=trip_obj, user = request.user)
     context = {'trip': trip_obj, 'form': form}
     return render(request, 'geo/trip_detail.html', context)
 
@@ -425,7 +432,6 @@ def add_trip_to_map2(request):
         endpoint_dump.append(coord)
 
     feature_collection = FeatureCollection(features)
-    # feature_dump = geojson.dumps(feature_collection)#, sort_keys=True)
 
     return HttpResponse(json.dumps({'endpoints': endpoint_dump, 'features': feature_collection}))#json.dumps(feature_collection))
 
@@ -459,11 +465,6 @@ def add_fencing(request):
 
         route_points = route_coordinates#rt_df.values  # shape (100k, 2)
 
-        # cols = truck_stop_df.columns.tolist()
-        # rev = cols[-1:] + cols[:-1]
-        #
-        # truck_stop_df = truck_stop_df[rev]
-
         truck_points = [[loc[8], loc[7]] for loc in truck_stop_df.values]#fm_df.values  # shape (800, 2)
 
         print(type(route_points), type(truck_points))
@@ -472,8 +473,6 @@ def add_fencing(request):
         route_points, truck_points = np.array(route_points), np.array(truck_points)
 
         all_distances = distance_matrix(route_points, truck_points)
-
-        # print(all_distances)# shape (100k, 800)
 
 
         for col, fmc in zip(all_distances.T, truck_points):
@@ -485,116 +484,22 @@ def add_fencing(request):
                                     }
                 marker_dump.append(coord)
 
-        # print(zz)
-
-
-        # for i, loc in enumerate(truck_stop_df.values):
-        #
-        #     # print(loc)
-        #
-        #     lat, lon = loc[7], loc[8]
-        #
-        #     coord = {'lat':str(lat),
-        #             'lon':str(lon),
-        #            }
-        #
-        #     if is_on_route(route_coordinates, coord):
-        #         marker_dump.append(coord)
-        #         # print(i)
-        #
-        # s = pd.Series([(loc[7], loc[8]) for loc in truck_stop_df.values])
-
-        # print('s before %s'%len(s))
-
-        # s.apply(is_on_route_inline, args=(route_coordinates,))
-
-        # print(s)
-
-
-        # feature_collection = FeatureCollection(features)
-        # feature_dump = geojson.dumps(feature_collection)#, sort_keys=True)
-
     return HttpResponse(json.dumps({'markers': marker_dump}))#json.dumps(feature_collection))
 
-'''
+@csrf_exempt
+def loc_autocomplete(request):
+    resp_data = []
 
-def subtract_custom_value(x, custom_value):
-    return x - custom_value
-    
-s.apply(subtract_custom_value, args=(5,))
+    if request.is_ajax():
+        locs=Location.objects.all()
+        q = request.GET.get('term', '')
+        locs = locs.filter(city__icontains=q)  # [:20]#(dispname__icontains = q )[:20]
 
-
-London      15
-New York    16
-Helsinki     7
-dtype: int64
-'''
-
-
-# def is_on_route_inline(x, route_coordinates):
-#     '''
-#
-#     :param route_coordinates:
-#     :param fencing_module_coordinate:
-#     :return: True if on route else False
-#     '''
-#
-#     lat, lon = x[0], x[1]
-#
-#
-#     # coord = {'lat': str(lat),
-#     #          'lon': str(lon),
-#     #          }
-#
-#     rcs = route_coordinates
-#
-#     fcmlat, fcmlon = float(lat), float(lon)
-#
-#     # dist = np.sqrt(np.sum([(fcmlat - b[0]) * (fcmlon - b[1]) for b in route_coordinates]))
-#
-#     a = np.array((fcmlat, fcmlon))
-#     bs = [np.array((c[1], c[0])) for c in rcs]
-#
-#
-#     def distance_inline(b, fcm_point):
-#         return np.linalg.norm(b-fcm_point)
-#
-#     bss = pd.Series(bs)
-#     distances = bss.apply(distance_inline, args=(a,))   #np.linalg.norm(a-b))
-#
-#     # distances = [np.linalg.norm(a-b) for b in bs]
-#
-#     if min(distances)<0.1:
-#         print(x)
-#         return True
-#
-#     return False
+        for loc in locs:
+            json_id = loc.id
+            json_label = '%s, %s'%(loc.city, loc.state)  # dispname
+            json_value = loc.city  # dispname
+            resp_data.append({'id': json_id, 'label': json_label, 'value': json_value})
 
 
-# def is_on_route(route_coordinates, fencing_module_coordinate):
-#     '''
-#
-#     :param route_coordinates:
-#     :param fencing_module_coordinate:
-#     :return: True if on route else False
-#     '''
-#     rcs, fcm = route_coordinates, fencing_module_coordinate
-#
-#     fcmlat, fcmlon = float(fcm['lat']), float(fcm['lon'])
-#
-#     # dist = np.sqrt(np.sum([(fcmlat - b[0]) * (fcmlon - b[1]) for b in route_coordinates]))
-#
-#     a = np.array((fcmlat, fcmlon))
-#     bs = [np.array((c[1], c[0])) for c in rcs]
-#
-#     distances = [np.linalg.norm(a-b) for b in bs]
-#
-#     if min(distances)<0.1:
-#         return True
-#
-#     return False
-
-
-
-
-
+    return JsonResponse(resp_data, safe=False)

@@ -41,6 +41,8 @@
 
 
 
+
+
   <button type="submit" class="btn btn-default">Submit</button>
 </form>
 
@@ -55,5 +57,75 @@
 {% block js %}
 
 
+
+
+// BEGIN ORIGIN AUTOCOMPLETE STUFF  orig_input_display
+ var cache = {};
+    $( ".orig_input_display" ).autocomplete({
+      minLength: 2,
+
+               select:function(event,ui) {
+       // $(".recipe_input").val(ui.item.id)  //<====== corresponds to display
+       $(".orig_input").val(ui.item.id);
+       // $(this).closest('.myformset_form').find(".number").val(1.00);
+      },
+
+      source: function( request, response ) {
+
+console.log('aaaaa');
+        var term = request.term;
+        if ( term in cache ) {
+          response( cache[ term ] );
+          return;
+        }
+
+        $.getJSON( "{% url 'loc_autocomplete' %}", request, function( data, status, xhr ) {
+          cache[ term ] = data;
+          response( data );
+
+        });  //end getJSON
+      } //end source
+
+
+
+
+    });
+
+// END ORIGIN AUTOCOMPLETE STUFF
+
+
+// BEGIN DEST AUTOCOMPLETE STUFF
+ var cache2 = {};
+    $( ".dest_input_display" ).autocomplete({
+      minLength: 2,
+
+               select:function(event,ui) {
+       // $(".recipe_input").val(ui.item.id)  //<====== corresponds to display
+       $(".dest_input").val(ui.item.id);
+       // $(this).closest('.myformset_form').find(".number").val(1.00);
+      },
+
+      source: function( request, response ) {
+
+console.log(request);
+        var term2 = request.term;
+        if ( term2 in cache2 ) {
+          response( cache2[ term ] );
+          return;
+        }
+
+        $.getJSON( "{% url 'loc_autocomplete' %}", request, function( data, status, xhr ) {
+          cache2[ term2 ] = data;
+          response( data );
+
+        });  //end getJSON
+      } //end source
+
+
+
+
+    });
+
+// END DEST AUTOCOMPLETE STUFF
 
 {% endblock %}

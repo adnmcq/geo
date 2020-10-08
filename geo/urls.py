@@ -32,8 +32,8 @@ urlpatterns = [
     path('', views.index2, name='index'),
     path('add_trip_to_map2', views.add_trip_to_map2, name='add_trip_to_map2'),
 
-    #add_fencing
     path('add_fencing', views.add_fencing, name='add_fencing'),
+    path('loc_autocomplete', views.loc_autocomplete, name='loc_autocomplete'),
 
 
 ]

@@ -118,6 +118,8 @@ class Load(models.Model):
         through_fields=('load', 'tracker'),
     )
 
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+
     def __str__(self):
         return 'orig: %s \ndest: %s'%(str(self.orig), str(self.dest))
 
@@ -184,6 +186,8 @@ class Trip(models.Model):
     check_point_time = models.DateTimeField(null=True, blank=True)
 
     active = models.BooleanField(default=True)
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
 
     def __str__(self):
         return 'load: %s \ntracker: %s'%(self.load.id, str(self.tracker))
