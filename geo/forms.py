@@ -67,9 +67,9 @@ class TripForm(ModelForm):
         model = Trip
         # exclude = ['check_point_time', 'check_point', 'load']
         fields = ['orig_display', 'orig_id', 'dest_display', 'dest_id',
-                  'tracker_select', 'active', 'client_id', 'ref']
+                  'tracker_select', 'active', 'ref']#'client_id', 'ref']
 
-    client_id = forms.IntegerField(widget=forms.HiddenInput(attrs={'class': 'client_id'}), required=False)
+    # client_id = forms.IntegerField(widget=forms.HiddenInput(attrs={'class': 'client_id'}), required=False)
 
     orig_id = forms.IntegerField(widget=forms.HiddenInput(attrs={'class': 'orig_input'}), required=False)
     dest_id = forms.IntegerField(widget=forms.HiddenInput(attrs={'class': 'dest_input'}), required=False)

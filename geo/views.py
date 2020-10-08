@@ -301,16 +301,33 @@ def trip(request, d_id=None):
 
         if not trip_obj:
             client = Client.objects.get(user = request.user)
-            form.fields['client_id'].initial = client.id
+            # form.fields['client_id'].initial = client.id
 
             #SOME MORE LOGIC TO CREATE THE LOAD, SELECT THE TRACKERS AND MAKE THE M2M rels
+
+
 
         if form.is_valid():
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
-            saved = form.save()
-            return HttpResponseRedirect(reverse('tracker', args=[saved.id]))
+            cd = form.cleaned_data
+
+            orig_id, dest_id, ref = cd['orig_id'], cd['dest_id'], cd['ref']
+            load, c=Load.objects.get_or_create(orig_id=orig_id,
+                                               dest_id=dest_id,
+                                               ref1=ref, client=client)
+
+            tracker_chips = cd['tracker_select']
+
+            for tc in tracker_chips:
+                trip, c = Trip.objects.get_or_create(load=load,
+                                                     tracker=tc,
+                                                     client=client)
+
+
+            # saved = form.save()
+            return HttpResponseRedirect(reverse('index'))#'tracker', args=[saved.id]))
 
     # if a GET (or any other method) we'll create a blank form
     else:
