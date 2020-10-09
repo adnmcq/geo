@@ -147,18 +147,10 @@ class Load(models.Model):
         return data
 
     def no_limit_directions(self):
-
         o, d = self.orig, self.dest
-
-
         search_string = urllib.parse.quote("%s,%s;%s,%s"%(o.lon, o.lat, d.lon, d.lat))
 
-        #-118.243908%2C34.05487%3B-73.980715%2C40.764916
-
-        #switch from geometries=polyline to geojson
         url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s"%(search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
-
-        # url = "https://api.mapbox.com/directions/v5/mapbox/driving/-118.243908%2C34.05487%3B-73.980715%2C40.764916.json?geometries=polyline&alternatives=true&steps=true&overview=full&access_token=pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p0MG01MXRqMW45cjQzb2R6b2ptc3J4MSJ9.zA2W0IkI0c6KaAhJfk9bWg"
 
         payload = {}
         headers = {
@@ -189,5 +181,39 @@ class Trip(models.Model):
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
 
+    # https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
+    route = models.JSONField(null=True)
+
     def __str__(self):
         return 'load: %s \ntracker: %s'%(self.load.id, str(self.tracker))
+
+
+    def no_limit_directions(self):
+        o, d = self.load.orig, self.load.dest
+
+        if self.check_point:
+            from_loc = self.check_point.loc
+        else:
+            from_loc=o
+
+        search_string = urllib.parse.quote("%s,%s;%s,%s"%(from_loc.lon, from_loc.lat, d.lon, d.lat))
+
+        url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s"%(search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
+
+        payload = {}
+        headers = {
+            'Connection': 'keep-alive',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
+            'Accept': '*/*',
+            'Origin': 'https://docs.mapbox.com',
+            'Sec-Fetch-Site': 'same-site',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Dest': 'empty',
+            'Referer': 'https://docs.mapbox.com/',
+            'Accept-Language': 'en-US,en;q=0.9'
+        }
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+        dict_str = response.text
+        data = json.loads(dict_str)
+        return data
