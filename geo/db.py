@@ -118,7 +118,7 @@ def db():
                 device_name=device_json['name'],
                 #created_date=created_date,
                 device_id=device_json['id'],
-                loc=loc,
+                loc=loc
             )
 
     #Load
@@ -134,7 +134,7 @@ def db():
         fm, c = Load.objects.get_or_create(
             ref1_type='L',
             ref1=o[0:3]+d[0:3],
-            orig=oo, dest=do,
+            orig=oo, dest=do, client=cli
         )
         #THIS NEXT PART IS DONE IN WEBHOOK
         # if c:

@@ -1,5 +1,5 @@
 
-from django.forms import ModelForm
+from django.forms import ModelForm, Form
 from .models import *
 
 from django import forms
@@ -9,18 +9,16 @@ from django import forms
 # Create the form class.
 class TrackerForm(ModelForm):
     def __init__(self, *args, **kwargs):
-        # SET 'form-control' class on text fields to make them bootstrap style
         super(TrackerForm, self).__init__(*args, **kwargs)
-        for field in self.visible_fields():
-            if field.field.widget.input_type in ['text','email']:
-                field.field.widget.attrs['class'] = 'form-control'
-        # SET required = False to overwrite the form-control, which sets it to True
+        # for field in self.visible_fields():
+        #     if field.field.widget.input_type in ['text','email']:
+        #         field.field.widget.attrs['class'] = 'form-control'
     class Meta:
         model = TrackerChip
         exclude = ['client']
 
-    client_id = forms.IntegerField(widget=forms.HiddenInput(attrs={'class': 'client_id'}), required=False)
-
+    client = forms.IntegerField(widget=forms.HiddenInput(attrs={'class': 'client_id'}), required=False)
+    # ref = forms.CharField(required=False)
 
 #Have orig and dest select/create loc
 #Have the list of trackers for trip be selectable based on trackers owned by that client
@@ -28,7 +26,7 @@ class TrackerForm(ModelForm):
 #active is True by default
 #checkpoint time, checkpoint are set later in events/ webhook
 
-class TripForm(ModelForm):
+class TripForm(Form):
     def __init__(self, *args, **kwargs):
         # SET 'form-control' class on text fields to make them bootstrap style
         user = kwargs.pop('user', None)  #form = TripForm(request.POST, request.FILES, user=request.user)
@@ -40,31 +38,8 @@ class TripForm(ModelForm):
         self.fields['tracker_select'].queryset = tracker_qs #User.objects.filter(pk=user.id)
 
 
-        for field in self.visible_fields():
-            pass
-            # if field.field.widget.input_type in ['text','email']:
-            #     field.field.widget.attrs['class'] = 'form-control'
-        # SET required = False to overwrite the form-control, which sets it to True
-
-
-        # if self.request.user:
-        #     unit_choices=[]
-        #     obj = RecipeItem.objects.get(id=self.instance.pk)
-        #     fn = obj.usdafood.foodnutrient_set.all()[0]
-        #     servings_queryset=NutrientServing.objects.filter(fn=fn)
-        #     for s in servings_queryset:
-        #         #print s.id
-        #         if s.eqv:
-        #             ret_str = "%s %s (%s g)"%(s.qty,s.serving.name,s.eqv)
-        #         else:
-        #             ret_str = "%s"%s.serving.name
-        #         unit_choices.append((s.id,ret_str))
-        #     #self.fields['units'].choices=unit_choices
-        # else:
-        #     unit_choices=[]
-        # self.fields['units'] = forms.CharField(widget=forms.Select(choices=unit_choices,attrs={'class':'units'}))
     class Meta:
-        model = Trip
+        # model = Trip
         # exclude = ['check_point_time', 'check_point', 'load']
         fields = ['orig_display', 'orig_id', 'dest_display', 'dest_id',
                   'tracker_select', 'active', 'ref']#'client_id', 'ref']

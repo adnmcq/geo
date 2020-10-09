@@ -183,37 +183,49 @@ class Trip(models.Model):
 
     # https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
     route = models.JSONField(null=True)
+    markers = models.JSONField(null=True)
 
     def __str__(self):
         return 'load: %s \ntracker: %s'%(self.load.id, str(self.tracker))
 
 
     def no_limit_directions(self):
-        o, d = self.load.orig, self.load.dest
 
-        if self.check_point:
-            from_loc = self.check_point.loc
+        #https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
+        if self.route:
+            data = self.route
         else:
-            from_loc=o
+            o, d = self.load.orig, self.load.dest
 
-        search_string = urllib.parse.quote("%s,%s;%s,%s"%(from_loc.lon, from_loc.lat, d.lon, d.lat))
+            if self.check_point:
+                from_loc = self.check_point.loc
+            else:
+                from_loc=o
 
-        url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s"%(search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
+            search_string = urllib.parse.quote("%s,%s;%s,%s"%(from_loc.lon, from_loc.lat, d.lon, d.lat))
 
-        payload = {}
-        headers = {
-            'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
-            'Accept': '*/*',
-            'Origin': 'https://docs.mapbox.com',
-            'Sec-Fetch-Site': 'same-site',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Dest': 'empty',
-            'Referer': 'https://docs.mapbox.com/',
-            'Accept-Language': 'en-US,en;q=0.9'
-        }
+            url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s"%(search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
 
-        response = requests.request("GET", url, headers=headers, data=payload)
-        dict_str = response.text
-        data = json.loads(dict_str)
+            payload = {}
+            headers = {
+                'Connection': 'keep-alive',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
+                'Accept': '*/*',
+                'Origin': 'https://docs.mapbox.com',
+                'Sec-Fetch-Site': 'same-site',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Dest': 'empty',
+                'Referer': 'https://docs.mapbox.com/',
+                'Accept-Language': 'en-US,en;q=0.9'
+            }
+
+            response = requests.request("GET", url, headers=headers, data=payload)
+            dict_str = response.text
+            data = json.loads(dict_str)
+
+            self.route = data
+            self.save()
         return data
+
+    def set_markers(self):
+        return 1

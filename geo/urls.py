@@ -5,17 +5,14 @@ from django.contrib.auth.decorators import login_required
 from . import views
 
 urlpatterns = [
-    # path('2', views.index, name='index'),
-    # path('add_trip_to_map', views.add_trip_to_map, name='add_trip_to_map'),
-    # path('trackers', views.trackers, name='trackers'),   #show all trackers
-    # path('loads', views.loads, name='loads'),    #show all trackers
 
+    #ModelForm for Tracker
     path('tracker/<int:d_id>', views.tracker, name='tracker'),  # add/ update trackers
     path('tracker', views.tracker, name='tracker'),  # add/ update trackers
 
 
-    path('trip/<int:d_id>', views.trip, name='trip'),  # add/ update trips
-    path('trip', views.trip, name='trip'),  # add/ update trips
+    path('edit_trip/<int:d_id>', views.edit_trip, name='edit_trip'),  # update trip TODO
+    path('add_trip', views.add_trip, name='add_trip'),  # add trip form (NOT a modelform)
 
 
     path('events/<str:device_id>', views.events, name='event'),  #Webhook endpoint
@@ -29,8 +26,8 @@ urlpatterns = [
 
 
     #OPTIMIZE?
-    path('', views.index2, name='index'),
-    path('add_trip_to_map2', views.add_trip_to_map2, name='add_trip_to_map2'),
+    path('', views.index, name='index'),
+    path('add_trip_to_map', views.add_trip_to_map, name='add_trip_to_map'),
 
     path('add_fencing', views.add_fencing, name='add_fencing'),
     path('loc_autocomplete', views.loc_autocomplete, name='loc_autocomplete'),

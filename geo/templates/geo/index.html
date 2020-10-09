@@ -3,21 +3,17 @@
 {% block content %}
  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Overview</h1>
-<!--        <div class="btn-toolbar mb-2 mb-md-0">-->
-<!--          <div class="btn-group mr-2">-->
-<!--            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>-->
-<!--            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>-->
-<!--          </div>-->
-<!--          <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">-->
-<!--            <span data-feather="calendar"></span>-->
-<!--          </button>-->
-
-<!--        </div>-->
       </div>
-      <!--<canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>-->
+
+
+<div id="accordion">
+  <h3>Trips</h3>
+  <div>
+    <p>
+
         <div id='map' style='width: 100%; height: 380px;'></div>
 
-      <h2>Trips</h2>
+      <!--<h2>Trips</h2>-->
 <table id="trips" class="display" style="width:100%">
         <thead>
             <tr>
@@ -33,123 +29,77 @@
         </thead>
         <tbody>
         </tbody>
-<!--        <tfoot>-->
-<!--            <tr>-->
-<!--                <th>Name</th>-->
-<!--            </tr>-->
-<!--        </tfoot>-->
+
+
     </table>
 
+    <a href="{% url 'add_trip' %}" class="btn btn-info" role="button">Add Trip</a>
+          </p>
+  </div>
 
 
-      <h2>Trackers</h2>
+  <h3>Trackers</h3>
+  <div>
+    <p>
+
+
+      <!--<h2>Trackers</h2>-->
 <table id="trackers" class="display" style="width:100%">
         <thead>
             <tr>
                 <th>DeviceName</th>
                 <th>TrackerId</th>
                 <th>CreatedDt</th>
-<!--                <th>Client</th>-->
+
 
             </tr>
         </thead>
         <tbody>
         </tbody>
-<!--        <tfoot>-->
-<!--            <tr>-->
-<!--                <th>Name</th>-->
-<!--            </tr>-->
-<!--        </tfoot>-->
+
+
+
     </table>
 
 
-      </div>
+      <!--https://stackoverflow.com/questions/36003670/how-to-put-a-link-on-a-button-with-bootstrap-->
+      <a href="{% url 'tracker' %}" class="btn btn-info" role="button">Add Tracker</a>
+
+          </p>
+  </div>
+        <!--<h3>Loads</h3>-->
+  <!--<div>-->
+    <!--<p>-->
+
+    <!--</p>-->
+  <!--</div>-->
+
+      </div>  <!-- Accordian -->
 {% endblock %}
 
 
 {% block js %}
 
-
-var markers = [];
-var features = [];
-
-var route_markers = [];
-var vroutes = [];
-
-function drawMarkers(features){
-  clearMarkers();
-  features.forEach((feature) => {
-
-    let marker = new mapboxgl.Marker()
-      .setLngLat(feature)
-      .addTo(map);
-    markers.push(marker)
-  });  // end features foreach
-
-}
+var featureData=null;
+var endpointData=null;
+var fencingData=null;
 
 
 
-
-
-
-function drawRoutes(){
-
+var endpoints=[];
+var fencing=[];
 
 
     //COPY THIS FOR GETTING ROUTES
     //https://docs.mapbox.com/help/tutorials/getting-started-directions-api/
-    //USE THIS TO CIRCUMVENT API LIMITATIONS
+    //USE BELOW TO CIRCUMVENT API LIMITATIONS
     //https://docs.mapbox.com/help/demos/how-mapbox-works/how-directions-works.html
 
 
-
-//map.addSource('routes', {
-
-var fc = {
-'type': 'geojson',
-'data': {
-'type': 'FeatureCollection',
-'features': [],
-}};
-
-
-//fc.data.features.push();
-//console.log(fc.data.features);
-
-
-
-
-//var geojson_elementS = [];  //NEED TO FIGURE THIS OUT
-var route=[];//only need to initialize here for debug reasons
-vroutes.forEach((_route) => {
-
-var trip_route_data = _route.routes[0];
-
-    //console.log(trip_route_data);
-    var route = trip_route_data.geometry.coordinates;
-//console.log(route[0]);  route is the list of coordinates of the linesring
-//geojson_elementS.push(route);
-
-
-
-
-    var geojson = {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'LineString',
-        coordinates: route
-      }
-    };  //end geojson
-
-fc.data.features.push(geojson);
-
-}); //end foreach
-
+function drawFeatures(featureData){
 
     if (map.getSource('all_routes_geojson_id')) {
-      map.getSource('all_routes_geojson_id').setData(fc.data);   //setData(geojson);
+      map.getSource('all_routes_geojson_id').setData(featureData);   //setData(geojson);
     console.log('route existed');
     } else {
     console.log('route didnt exist');
@@ -162,12 +112,14 @@ fc.data.features.push(geojson);
           type: 'geojson',
           data: {
 
+
             type: 'Feature',
             properties: {},
             geometry: {
               type: 'LineString',
               coordinates: []
-            }
+            },
+
           }  //data
 
 
@@ -184,33 +136,65 @@ fc.data.features.push(geojson);
       });
 
 
-console.log(fc.data);
-    map.getSource('all_routes_geojson_id').setData(fc.data);   //setData(geojson);
+console.log(featureData);
+    map.getSource('all_routes_geojson_id').setData(featureData);   //setData(geojson);
 
 
-    //route_markers.push(route_marker);
-    }   //end else
 
-//});  //MOVE THE DRAWING OF ROUTES OUTSIDE OF FOREACH//end vroutes _foreach
+}//end else
 
 
- clearRoutes();
+
+}//end function drawFeatures
+
+
+function drawEndpoints(endpointData){
+  clearEndpoints();
+  endpointData.forEach((ends) => {
+
+                var dest_ll = new mapboxgl.LngLat(ends["dest_lon"], ends["dest_lat"]);
+                var orig_ll = new mapboxgl.LngLat(ends["orig_lon"], ends["orig_lat"]);
+
+
+
+    let dmarker = new mapboxgl.Marker()
+      .setLngLat(dest_ll)
+      .addTo(map);
+    endpoints.push(dmarker)
+
+    let omarker = new mapboxgl.Marker()
+      .setLngLat(orig_ll)
+      .addTo(map);
+    endpoints.push(omarker)
+  });  // end endpointData foreach
 
 }
 
+function clearEndpoints(){
+  endpoints.forEach((marker) => marker.remove());
+}
 
-function clearMarkers(){
-  markers.forEach((marker) => marker.remove());
-  markers = [];
 
- // features.forEach((feature) => feature.remove());
-  features = [];
+
+function drawFencing(fencingData){
+  clearFencing();
+  fencingData.forEach((pt) => {
+
+                var pt_ll = new mapboxgl.LngLat(pt["lon"], pt["lat"]);
+
+
+    let marker = new mapboxgl.Marker()
+      .setLngLat(pt_ll)
+      .addTo(map);
+    fencing.push(marker)
+
+
+  });  // end fencingData foreach
 
 }
 
-function clearRoutes(){
-
- vroutes = [];
+function clearFencing(){
+  fencing.forEach((marker) => marker.remove());
 }
 
 
@@ -236,39 +220,38 @@ $(document).on('change', '.trip_checkbox', function() {
     //each element of data list is (start, stop, route_geometry_json
     // route geometry json comes from a GET to mapbox API in Trip model method
     //will try and save/cache this data due to API restrictions
+
+console.log(data);
     data = JSON.parse(data);
-
-    data.forEach((data_pt) => {
-
-                dest_lon=data_pt["dest_lon"];
-                dest_lat=data_pt["dest_lat"];
-
-                orig_lon=data_pt["orig_lon"];
-                orig_lat=data_pt["orig_lat"];
+console.log(data);
 
 
-                var dest_ll = new mapboxgl.LngLat(data_pt["dest_lon"], data_pt["dest_lat"]);
-                var orig_ll = new mapboxgl.LngLat(data_pt["orig_lon"], data_pt["orig_lat"]);
+featureData=data['features'];
+endpointData=data['endpoints'];
 
-                features.push(dest_ll)
-                features.push(orig_ll)
+drawFeatures(featureData);
+drawEndpoints(endpointData);
 
-                //data for one trip, one by one into an array vroutes
-                var trip_routes_data=data_pt["trip_routes_data"];
-                //console.log(data_pt["trip_routes_data"])
-
-                vroutes.push(trip_routes_data);
+});  //end .$post  for getting trip features
 
 
 
-    });
-
-    drawMarkers(features)
-    drawRoutes(vroutes)
+    $.post( "{% url 'add_fencing' %}", {  trip_ids: JSON.stringify(trip_ids) }, function( data ) {
 
 
+    //each element of data list is (start, stop, route_geometry_json
+    // route geometry json comes from a GET to mapbox API in Trip model method
+    //will try and save/cache this data due to API restrictions
 
-});  //end .$post
+console.log(data);
+    data = JSON.parse(data);
+console.log(data);
+
+fencingData=data['markers'];
+
+drawFencing(fencingData);
+
+});  //end .$post  for getting fencing modules
 
 
 
@@ -284,6 +267,13 @@ $(document).on('change', '.trip_checkbox', function() {
         });
 
 
+map.on('load', function(e) {
+console.log('MAP LOADED');
+
+
+});   //end map load
+
+
 // datatables
     var oTable = $('#trackers').dataTable({
         // ...
@@ -293,6 +283,14 @@ $(document).on('change', '.trip_checkbox', function() {
     });
     // ...
 
+  /*  var oTable = $('#loads').dataTable({
+        // ...
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{ url 'load_list_json' %}"
+    });  */
+    // ...
+
     var oTable2 = $('#trips').dataTable({
         // ...
         "processing": true,
@@ -300,6 +298,13 @@ $(document).on('change', '.trip_checkbox', function() {
         "ajax": "{% url 'trip_list_json' %}"
     });
     // ...
+
+$.fn.dataTable.ext.errMode = 'throw';
+
+
+// Accordian
+
+$( "#accordion" ).accordion();
 
 
 

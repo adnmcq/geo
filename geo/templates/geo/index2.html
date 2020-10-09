@@ -214,7 +214,7 @@ $(document).on('change', '.trip_checkbox', function() {
     var trip_id = $(this).attr("id");  //prob not needed
 
 
-    $.post( "{% url 'add_trip_to_map2' %}", { trip_id: trip_id, trip_ids: JSON.stringify(trip_ids) }, function( data ) {
+    $.post( "{% url 'vroutes' %}", { trip_id: trip_id, trip_ids: JSON.stringify(trip_ids) }, function( data ) {
 
 
     //each element of data list is (start, stop, route_geometry_json

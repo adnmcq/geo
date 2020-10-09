@@ -53,18 +53,6 @@ import numpy as np
 from scipy.spatial import distance_matrix
 
 
-# from spyrk import SparkCloud
-# spark = SparkCloud(PARTICLE_ACCESS_TOKEN)
-# tracker_dict = {}
-# for fm in fencing_modules:
-#     for s in spark.devices:
-#         if fm == s:
-#             tracker_dict[spark.devices[s].Name] = {"Time": spark.devices[s].Time,
-#                                                    "CheckPoint_Name": fm,
-#                                                    "CheckPoint_DeviceID": spark.devices[s].id,
-#                                                    "CheckPoint_Location": fencing_modules[fm]
-#                                                    }
-# print(tracker_dict)
 
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.utils.html import escape
@@ -140,11 +128,6 @@ class TripListJson(BaseDatatableView):
         return qs
 
     def prepare_results(self, qs):
-        # prepare list with output column data
-        # queryset is already paginated here
-        # shop_id = self.kwargs.get('shop_id', None)
-        # customer_id = self.kwargs.get('customer_id', None)
-        # simple example:
 
         json_data = []
         for item in qs:
@@ -175,44 +158,14 @@ class TripListJson(BaseDatatableView):
         return json_data
 
 
-
-# class LoadListJson(BaseDatatableView):
-#     model = Load
-#     columns = ['ref1_type', 'ref1', 'orig', 'dest']
-#
-#     order_columns = ['ref1_type', 'ref1', 'orig', 'dest']
-#     max_display_length = 500
-#
-#     def render_column(self, row, column):
-#         return super(LoadListJson, self).render_column(row, column)
-#
-#     def filter_queryset(self, qs):
-#         # use parameters passed in GET request to filter queryset
-#         search = self.request.GET.get('search[value]', None)
-#         if search:
-#             qs = qs.filter(ref1__istartswith=search)
-#         return qs
-
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
 
 @login_required(login_url='/accounts/login/')
 def index(request):
-    # for loc in Location.objects.all():
-    #
-    #     city_data = Location.objects.get(city=loc.city).forward()
-    #     logger.info('location %s'%city_data)
-    #     print('location %s'%city_data)
 
-    # city_data = Location.objects.get(city='Chicago').reverse()
-    # logger.info('location %s'%city_data)
-    # print('location %s'%city_data)
-
-
-    tracker_dict = {}
-    context = {'devices': tracker_dict, 'mapbox_token': MAPBOX_ACCESS_TOKEN}
+    context = { 'mapbox_token': MAPBOX_ACCESS_TOKEN}
     return render(request, 'geo/index.html', context)
 
 
@@ -277,40 +230,16 @@ def events(request, device_id):
     return JsonResponse({'ok': 'ok'}, safe=False)
 
 
-
-# def loads(request):
-#     context = {}
-#     return render(request, 'geo/loads.html', context)
-#
-#
-# def trackers(request):
-#     context = {}
-#     return render(request, 'geo/trackers.html', context)
-
-
-def trip(request, d_id=None):
+def add_trip(request):
     # if this is a POST request we need to process the form data
-    if d_id:
-        trip_obj = Trip.objects.get(pk=d_id)
-    else:
-        trip_obj = None
+
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = TripForm(request.POST, instance=trip_obj, user = request.user)
-        # check whether it's valid:
-
-        if not trip_obj:
-            client = Client.objects.get(user = request.user)
-            # form.fields['client_id'].initial = client.id
-
-            #SOME MORE LOGIC TO CREATE THE LOAD, SELECT THE TRACKERS AND MAKE THE M2M rels
-
-
+        form = TripForm(request.POST, user = request.user)#request.POST, instance=trip_obj, user = request.user)
 
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
+            client = Client.objects.get(user = request.user)
+
             cd = form.cleaned_data
 
             orig_id, dest_id, ref = cd['orig_id'], cd['dest_id'], cd['ref']
@@ -331,10 +260,13 @@ def trip(request, d_id=None):
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = TripForm(instance=trip_obj, user = request.user)
-    context = {'trip': trip_obj, 'form': form}
-    return render(request, 'geo/trip_detail.html', context)
+        form = TripForm(user = request.user)#instance=trip_obj, user = request.user)
+    context = {'form': form}
+    return render(request, 'geo/add_trip_detail.html', context)
 
+
+def edit_trip(request, d_id=None):
+    HttpResponse('ok')
 
 def tracker(request, d_id=None):
     # if this is a POST request we need to process the form data
@@ -348,7 +280,7 @@ def tracker(request, d_id=None):
         # check whether it's valid:
         if not tracker_obj:
             client = Client.objects.get(user = request.user)
-            form.fields['client_id'].initial = client.id
+            form.fields['client'].initial = client#.id
 
         if form.is_valid():
             # process the data in form.cleaned_data as required
@@ -363,42 +295,10 @@ def tracker(request, d_id=None):
     context = {'tracker': tracker_obj, 'form': form}
     return render(request, 'geo/tracker_detail.html', context)
 
+
+
 @csrf_exempt
 def add_trip_to_map(request):
-    trip_id = request.POST['trip_id']
-    trip_ids = json.loads(request.POST['trip_ids'])
-
-    data = []
-
-    for trip_id in trip_ids:
-
-        trip = Trip.objects.get(pk = trip_id)
-
-        directions = trip.load.no_limit_directions()
-        orig, dest = trip.load.orig, trip.load.dest
-        data_pt = {'orig_lat':str(orig.lat),
-                'orig_lon':str(orig.lon),
-                'dest_lat':str(dest.lat),
-                'dest_lon':str(dest.lon),
-                   "trip_routes_data":directions  }
-        data.append(data_pt)
-
-    return HttpResponse(json.dumps(data))
-
-
-
-#OPTIMIZE?
-
-
-@login_required(login_url='/accounts/login/')
-def index2(request):
-
-    tracker_dict = {}
-    context = {'devices': tracker_dict, 'mapbox_token': MAPBOX_ACCESS_TOKEN}
-    return render(request, 'geo/index2.html', context)
-
-@csrf_exempt
-def add_trip_to_map2(request):
     trip_id = request.POST['trip_id']
     trip_ids = json.loads(request.POST['trip_ids'])
 
@@ -411,36 +311,16 @@ def add_trip_to_map2(request):
 
         trip = Trip.objects.get(pk = trip_id)
 
-        directions = trip.load.no_limit_directions()
+        # directions = trip.load.no_limit_directions()
+        directions=trip.no_limit_directions()
+
         coordinates = directions['routes'][0]['geometry']['coordinates']
 
         orig, dest = trip.load.orig, trip.load.dest
 
-        # orig_point_feature = Feature(geometry=Point((str(orig.lat), str(orig.lon))))
-        # dest_point_feature = Feature(geometry=Point((str(dest.lat), str(dest.lon))))
-
-        # orig_point_feature = Feature(geometry=Point((float(orig.lon), float(orig.lat))))
-        # dest_point_feature = Feature(geometry=Point((float(dest.lon), float(dest.lat))))
-
-
-        # orig_point_feature = Feature(geometry=Point((43.24, -1.532)))
-        # dest_point_feature = Feature(geometry=Point((43.24, -1.532)))
-
-
-
         trip_route = Feature(geometry=LineString(coordinates))#[(8.919, 44.4074), (8.923, 44.4075)])
 
-        # features.append(orig_point_feature)
-        # features.append(dest_point_feature)
         features.append(trip_route)
-
-
-        # data_pt = {'orig_lat':str(orig.lat),
-        #         'orig_lon':str(orig.lon),
-        #         'dest_lat':str(dest.lat),
-        #         'dest_lon':str(dest.lon),
-        #            "trip_routes_data":directions  }
-        # data.append(data_pt)
 
         coord = {'orig_lat':str(orig.lat),
                 'orig_lon':str(orig.lon),
@@ -477,7 +357,7 @@ def add_fencing(request):
 
         trip = Trip.objects.get(pk = trip_id)
 
-        directions = trip.load.no_limit_directions()
+        directions = trip.no_limit_directions()#trip.load.no_limit_directions()
         route_coordinates = directions['routes'][0]['geometry']['coordinates']
 
         route_points = route_coordinates#rt_df.values  # shape (100k, 2)
