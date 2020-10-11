@@ -32,5 +32,9 @@ urlpatterns = [
     path('add_fencing', views.add_fencing, name='add_fencing'),
     path('loc_autocomplete', views.loc_autocomplete, name='loc_autocomplete'),
 
+    #Keith wants separate link/pages for managing trackers and trips
+    path('manage_trackers', views.manage_trackers, name='manage_trackers'),
+    path('manage_trips', views.manage_trips, name='manage_trips'),
+
 
 ]

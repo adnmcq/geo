@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+ <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Trips</h1>
+      </div>
+
+
+<!--<div id="accordion">-->
+<!--  <h3>Trips</h3>-->
+<!--  <div>-->
+<!--    <p>-->
+
+<!--        <div id='map' style='width: 100%; height: 380px;'></div>-->
+
+      <!--<h2>Trips</h2>-->
+<table id="trips" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Tracker</th>
+
+                <th>Origin</th>
+                <th>Destination</th>
+                <th>Last Check</th>
+                <th>Check Time</th>
+                <th>Active</th>
+
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+
+
+    </table>
+
+    <a href="{% url 'add_trip' %}" class="btn btn-info" role="button">Add Trip</a>
+<!--          </p>-->
+<!--  </div>-->
+
+
+<!--  <h3>Trackers</h3>-->
+<!--  <div>-->
+<!--    <p>-->
+
+
+<!--      &lt;!&ndash;<h2>Trackers</h2>&ndash;&gt;-->
+<!--<table id="trackers" class="display" style="width:100%">-->
+<!--        <thead>-->
+<!--            <tr>-->
+<!--                <th>DeviceName</th>-->
+<!--                <th>TrackerId</th>-->
+<!--                <th>CreatedDt</th>-->
+
+
+<!--            </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--        </tbody>-->
+
+
+
+<!--    </table>-->
+
+
+<!--      &lt;!&ndash;https://stackoverflow.com/questions/36003670/how-to-put-a-link-on-a-button-with-bootstrap&ndash;&gt;-->
+<!--      <a href="{% url 'tracker' %}" class="btn btn-info" role="button">Add Tracker</a>-->
+
+<!--          </p>-->
+<!--  </div>-->
+<!--        &lt;!&ndash;<h3>Loads</h3>&ndash;&gt;-->
+<!--  &lt;!&ndash;<div>&ndash;&gt;-->
+<!--    &lt;!&ndash;<p>&ndash;&gt;-->
+
+<!--    &lt;!&ndash;</p>&ndash;&gt;-->
+<!--  &lt;!&ndash;</div>&ndash;&gt;-->
+
+<!--      </div>  &lt;!&ndash; Accordian &ndash;&gt;-->
+{% endblock %}
+
+
+{% block js %}
+
+// datatables
+    var oTable = $('#trackers').dataTable({
+        // ...
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{% url 'tracker_list_json' %}"
+    });
+    // ...
+
+  /*  var oTable = $('#loads').dataTable({
+        // ...
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{ url 'load_list_json' %}"
+    });  */
+    // ...
+
+    var oTable2 = $('#trips').dataTable({
+        // ...
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{% url 'trip_list_json' %}"
+    });
+    // ...
+
+$.fn.dataTable.ext.errMode = 'throw';
+
+
+// Accordian
+
+//$( "#accordion" ).accordion();
+
+
+
+{% endblock %}

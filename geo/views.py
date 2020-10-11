@@ -376,3 +376,13 @@ def loc_autocomplete(request):
 
 
     return JsonResponse(resp_data, safe=False)
+
+@login_required(login_url='/accounts/login/')
+def manage_trackers(request):
+    context = {'mapbox_token': MAPBOX_ACCESS_TOKEN}
+    return render(request, 'geo/manage_trackers.html', context)
+
+@login_required(login_url='/accounts/login/')
+def manage_trips(request):
+    context = {'mapbox_token': MAPBOX_ACCESS_TOKEN}
+    return render(request, 'geo/manage_trips.html', context)
