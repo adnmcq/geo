@@ -6,7 +6,12 @@ from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN, MAPBOX_NO_
 
 import requests, datetime
 import urllib.parse
-import json
+import json, os
+import numpy as np
+from scipy.spatial import distance_matrix
+import pandas as pd
+
+from quiz.settings import BASE_DIR
 
 class Client(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -183,7 +188,8 @@ class Trip(models.Model):
 
     # https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
     route = models.JSONField(null=True)
-    markers = models.JSONField(null=True)
+    endpoints = models.JSONField(null=True)
+    fencing = models.JSONField(null=True)
 
     def __str__(self):
         return 'load: %s \ntracker: %s'%(self.load.id, str(self.tracker))
@@ -227,5 +233,96 @@ class Trip(models.Model):
             self.save()
         return data
 
-    def set_markers(self):
+    def get_endpoints(self):
+
+        if self.endpoints:
+            coord = self.endpoints
+        else:
+            orig, dest = self.load.orig, self.load.dest
+
+            coord = {'orig_lat':str(orig.lat),
+                    'orig_lon':str(orig.lon),
+                    'dest_lat':str(dest.lat),
+                    'dest_lon':str(dest.lon)}
+
+            # coord = json.loads(coord)
+
+            self.endpoints = coord
+            self.save()
+
+        return coord
+
+
+    def get_fencing(self):
+
+        if self.fencing:
+            fencing = self.fencing
+        else:
+            directions = self.no_limit_directions()
+
+            route_coordinates = directions['routes'][0]['geometry']['coordinates']
+
+            route_points = route_coordinates  # rt_df.values  # shape (100k, 2)
+
+            # truck_stop_df = pd.read_csv(os.path.join(BASE_DIR, 'pilot_locations.csv'))
+            # truck_points = [[ts[8], ts[7]] for ts in truck_stop_df.values]  # fm_df.values  # shape (800, 2)
+            # fencing_points = truck_points
+
+            #id, lat, lon
+            fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
+
+            #gotta flip the lat, lon
+            #to id, lon, lat
+            # to match what is retured by the routes endpoint
+            fencing_points = [[ts[0], ts[2], ts[1]] for ts in fencing_df.values]
+
+            # ndarray fencing_points.shape
+            # Out[3]: (802, 3)
+
+            route_points, fencing_points = np.array(route_points) , np.array(fencing_points)
+
+            all_distances = distance_matrix(route_points, fencing_points[:,1:]) #just lat, lon
+
+            fencing = []
+
+            for col, fmc in zip(all_distances.T, fencing_points):
+                if min(col) < 0.1:
+                    coord = {'id': str(fmc[0]),
+                             'lon': str(fmc[1]),
+                             'lat': str(fmc[2]),
+                             'last': 0
+                             }
+                    fencing.append(coord)
+
+            self.fencing = fencing
+            self.save()
+
+        return fencing
+
+
+    def update_fencing(self):
+
+        fencing = self.get_fencing()
+
+
+        # go through the fencing modules associated with trip, highlight red the one
+        #that is last
+
+
+        #TODO how to set the loc field on FM model? With fencing_locations.csv
+        fmid =  self.check_point.device_id
+        if fmid in [fm['id'] for fm in fencing]:
+            idx = [fm['id'] for fm in fencing].index(fmid)
+            fencing[idx]['last']=1
+        else: # went off track, add the
+            #id, lat, lon
+            fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
+            this_row = fencing_df.loc[fencing_df['id'] == fmid]
+            lon, lat = this_row['lon'], this_row['lat']
+            fencing.append({'id': fmid,
+                             'lon': lon,
+                             'lat': lat,
+                             'last': 1
+                             })
+
         return 1

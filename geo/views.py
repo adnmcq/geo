@@ -181,7 +181,7 @@ def events(request, device_id):
         fencing_id = data.get('coreid')
         published_at = data.get('published_at')
         device_data = data.get('data')
-        if data and fencing_id and published_at:
+        if device_data and fencing_id and published_at:
             device_data_dict = json.loads(device_data)
             tracker_name = device_data_dict.get('DeviceName')
             tracker_id = device_data_dict.get('DeviceID')
@@ -208,6 +208,9 @@ def events(request, device_id):
                                                                 check_point = fencing_module)
             fake_trip_to_update.check_point_time = published_at
             fake_trip_to_update.save()
+            device_data()
+
+            # fake_trip_to_update.update_fencing()
 
 
         '''
@@ -316,17 +319,19 @@ def add_trip_to_map(request):
 
         coordinates = directions['routes'][0]['geometry']['coordinates']
 
-        orig, dest = trip.load.orig, trip.load.dest
+        # orig, dest = trip.load.orig, trip.load.dest
 
         trip_route = Feature(geometry=LineString(coordinates))#[(8.919, 44.4074), (8.923, 44.4075)])
 
         features.append(trip_route)
 
-        coord = {'orig_lat':str(orig.lat),
-                'orig_lon':str(orig.lon),
-                'dest_lat':str(dest.lat),
-                'dest_lon':str(dest.lon)}
-        endpoint_dump.append(coord)
+        # coord = {'orig_lat':str(orig.lat),
+        #         'orig_lon':str(orig.lon),
+        #         'dest_lat':str(dest.lat),
+        #         'dest_lon':str(dest.lon)}
+
+        endpoint_coords = trip.get_endpoints()
+        endpoint_dump.append(endpoint_coords)
 
     feature_collection = FeatureCollection(features)
 
@@ -337,49 +342,20 @@ def add_trip_to_map(request):
 @csrf_exempt
 def add_fencing(request):
     '''
-    Flying V/ Pilot locations.csv
-
-    > GET THE TRIP IDS, COMPARE DIRECTIONS COORDINATES TO FENCING MODULES, ONLY RETAIN COORDINATES THAT ARE ON OR CLOSE TO ROOT EUCLIDIAN DISTANCE
 
     Might be able to get other locations from http://www.poi-factory.com/ , etc
     :param request:
     :return:
     '''
-    truck_stop_df = pd.read_csv(os.path.join(BASE_DIR, 'locations.csv'))
     marker_dump = []
 
-
     trip_ids = json.loads(request.POST['trip_ids'])
-
-
 
     for trip_id in trip_ids:
 
         trip = Trip.objects.get(pk = trip_id)
+        marker_dump+=trip.get_fencing()
 
-        directions = trip.no_limit_directions()#trip.load.no_limit_directions()
-        route_coordinates = directions['routes'][0]['geometry']['coordinates']
-
-        route_points = route_coordinates#rt_df.values  # shape (100k, 2)
-
-        truck_points = [[loc[8], loc[7]] for loc in truck_stop_df.values]#fm_df.values  # shape (800, 2)
-
-        print(type(route_points), type(truck_points))
-        print(np.shape(route_points), np.shape(truck_points))
-
-        route_points, truck_points = np.array(route_points), np.array(truck_points)
-
-        all_distances = distance_matrix(route_points, truck_points)
-
-
-        for col, fmc in zip(all_distances.T, truck_points):
-            if min(col) < 0.1:
-                # print(min(col), fmc)
-
-                coord = {'lat': str(fmc[1]),
-                                     'lon':str(fmc[0]),
-                                    }
-                marker_dump.append(coord)
 
     return HttpResponse(json.dumps({'markers': marker_dump}))#json.dumps(feature_collection))
 
