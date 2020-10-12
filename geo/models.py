@@ -13,6 +13,9 @@ import pandas as pd
 
 from quiz.settings import BASE_DIR
 
+import logging
+logger = logging.getLogger('django.server')
+
 class Client(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     def __str__(self):
@@ -302,7 +305,12 @@ class Trip(models.Model):
 
     def update_fencing(self):
 
+        logger.info('BEGIN UPDATE FENCING')
+
+
         fencing = self.get_fencing()
+
+        logger.info('ORIGINAL FENCING', fencing)
 
 
         # go through the fencing modules associated with trip, highlight red the one
@@ -324,5 +332,6 @@ class Trip(models.Model):
                              'lat': lat,
                              'last': 1
                              })
+        logger.info('FINISHED UPDATE FENCING')
 
         return 1
