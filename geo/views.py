@@ -205,14 +205,17 @@ def events(request, device_id):
             fake_load = Load.objects.all()[0]
 
 
-            client = Client.objects.get(user = request.user)
-            fake_trip_to_update, c3 = Trip.objects.get_or_create(load = fake_load, tracker = tracker_chip,
-                                                                check_point = fencing_module, client=client)
-            fake_trip_to_update.check_point_time = published_at
-            fake_trip_to_update.save()
-            device_data()
+            # client = Client.objects.get(user = request.user) request.user is AnonymousUser
 
-            fake_trip_to_update.update_fencing()
+            fake_trips_to_update = Trip.objects.filter(load = fake_load, tracker = tracker_chip,
+                                                                check_point = fencing_module)
+            
+            for fake_trip_to_update in fake_trips_to_update:
+                fake_trip_to_update.check_point_time = published_at
+                fake_trip_to_update.save()
+                device_data()
+
+                fake_trip_to_update.update_fencing()
 
 
         '''
