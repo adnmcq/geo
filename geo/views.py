@@ -204,6 +204,7 @@ def events(request, device_id):
 
             fake_load = Load.objects.all()[0]
 
+            #TODO - get all active loads (trips) associated with the tracker, Trip
 
             # client = Client.objects.get(user = request.user) request.user is AnonymousUser
 
@@ -213,7 +214,7 @@ def events(request, device_id):
                 fake_trip_to_update.check_point = fencing_module
                 fake_trip_to_update.check_point_time = published_at
                 fake_trip_to_update.save()
-                device_data()
+                # device_data()
 
                 fake_trip_to_update.update_fencing()
 
