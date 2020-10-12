@@ -190,9 +190,21 @@ class Trip(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
 
     # https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
-    route = models.JSONField(null=True)
-    endpoints = models.JSONField(null=True)
-    fencing = models.JSONField(null=True)
+    route = models.JSONField(default=dict, blank=True)
+    endpoints = models.JSONField(default=dict, blank=True)
+    fencing = models.JSONField(default=dict, blank=True)
+
+    def clean(self, *args, **kwargs):
+        if self.route is None:
+            self.route = "{}"
+        if self.endpoints is None:
+            self.endpoints = "{}"
+        if self.fencing is None:
+            self.fencing = "{}"
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return 'load: %s \ntracker: %s'%(self.load.id, str(self.tracker))
@@ -201,7 +213,7 @@ class Trip(models.Model):
     def no_limit_directions(self):
 
         #https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
-        if self.route:
+        if self.route and self.route!="{}":
             data = self.route
         else:
             o, d = self.load.orig, self.load.dest
@@ -238,7 +250,7 @@ class Trip(models.Model):
 
     def get_endpoints(self):
 
-        if self.endpoints:
+        if self.endpoints and self.endpoints != "{}":
             coord = self.endpoints
         else:
             orig, dest = self.load.orig, self.load.dest
@@ -258,7 +270,7 @@ class Trip(models.Model):
 
     def get_fencing(self):
 
-        if self.fencing:
+        if self.fencing and self.endpoints != "{}":
             fencing = self.fencing
         else:
             directions = self.no_limit_directions()
