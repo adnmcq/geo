@@ -207,10 +207,10 @@ def events(request, device_id):
 
             # client = Client.objects.get(user = request.user) request.user is AnonymousUser
 
-            fake_trips_to_update = Trip.objects.filter(load = fake_load, tracker = tracker_chip,
-                                                                check_point = fencing_module)
-            
+            fake_trips_to_update = Trip.objects.filter(load = fake_load, tracker = tracker_chip)
+
             for fake_trip_to_update in fake_trips_to_update:
+                fake_trip_to_update.check_point = fencing_module
                 fake_trip_to_update.check_point_time = published_at
                 fake_trip_to_update.save()
                 device_data()
