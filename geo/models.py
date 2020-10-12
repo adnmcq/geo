@@ -333,6 +333,8 @@ class Trip(models.Model):
 
         #TODO how to set the loc field on FM model? With fencing_locations.csv
         fmid =  self.check_point.device_id
+
+        print('FMID', fmid)
         if fmid in [fm['id'] for fm in fencing]:
             idx = [fm['id'] for fm in fencing].index(fmid)
             fencing[idx]['last']=1
