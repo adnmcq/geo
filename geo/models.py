@@ -342,7 +342,7 @@ class Trip(models.Model):
             #id, lat, lon
             fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
             this_row = fencing_df.loc[fencing_df['ID'] == fmid]
-            lon, lat = this_row['Longitude'][0], this_row['Latitude'][0]
+            lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
             fencing.append({'id': fmid,
                              'lon': lon,
                              'lat': lat,

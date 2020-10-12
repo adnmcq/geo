@@ -164,7 +164,10 @@ def logout_view(request):
 
 @login_required(login_url='/accounts/login/')
 def index(request):
-
+    fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
+    this_row = fencing_df.loc[fencing_df['ID'] == 'e00fce68aadec91d27441ac2']
+    print(this_row)
+    lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
 
     context = { 'mapbox_token': MAPBOX_ACCESS_TOKEN}
     return render(request, 'geo/index.html', context)
