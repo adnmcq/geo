@@ -204,6 +204,8 @@ class Trip(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
+        self.get_fencing() #calls no_limit_directions TODO I think
+        self.get_endpoints()
         super().save(*args, **kwargs)
 
     def __str__(self):
