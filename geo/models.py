@@ -272,7 +272,7 @@ class Trip(models.Model):
 
     def get_fencing(self):
 
-        if self.fencing and self.endpoints != "{}":
+        if self.fencing and self.fencing != "{}":
             fencing = self.fencing
         else:
             directions = self.no_limit_directions()
