@@ -165,6 +165,7 @@ def logout_view(request):
 @login_required(login_url='/accounts/login/')
 def index(request):
 
+
     context = { 'mapbox_token': MAPBOX_ACCESS_TOKEN}
     return render(request, 'geo/index.html', context)
 
