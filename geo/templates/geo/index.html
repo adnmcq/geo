@@ -95,10 +95,21 @@
  .endpoint_marker {
   background-image: url("{%  static 'img/red_icon.png' %}");
   background-size: cover;
-  width: 50px;
-  height: 50px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   cursor: pointer;
+  }
+
+
+   .checkedpoint_marker {
+  background-image: url("{%  static 'img/green_icon.png' %}");
+  background-size: cover;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  }
 
 </style>
 
@@ -116,6 +127,7 @@ var fencingData=null;
 
 var endpoints=[];
 var fencing=[];
+var checkedPoints =[];
 
 
     //COPY THIS FOR GETTING ROUTES
@@ -128,9 +140,9 @@ function drawFeatures(featureData){
 
     if (map.getSource('all_routes_geojson_id')) {
       map.getSource('all_routes_geojson_id').setData(featureData);   //setData(geojson);
-    console.log('route existed');
+    //console.log('route existed');
     } else {
-    console.log('route didnt exist');
+    //console.log('route didnt exist');
      let route_marker = map.addLayer({
         id: 'all_routes_geojson_id',
         type: 'line',
@@ -164,7 +176,7 @@ function drawFeatures(featureData){
       });
 
 
-console.log(featureData);
+//console.log(featureData);
     map.getSource('all_routes_geojson_id').setData(featureData);   //setData(geojson);
 
 
@@ -179,14 +191,15 @@ console.log(featureData);
 function drawEndpoints(endpointData){
   clearEndpoints();
 
+
+  endpointData.forEach((ends) => {
+
+
   var custom_orig_ep = document.createElement('div');
   custom_orig_ep.className = 'endpoint_marker';
 
   var custom_dest_ep = document.createElement('div');
   custom_dest_ep.className = 'endpoint_marker';
-
-
-  endpointData.forEach((ends) => {
 
                 var dest_ll = new mapboxgl.LngLat(ends["dest_lon"], ends["dest_lat"]);
                 var orig_ll = new mapboxgl.LngLat(ends["orig_lon"], ends["orig_lat"]);
@@ -202,7 +215,7 @@ function drawEndpoints(endpointData){
     endpoints.push(omarker)
 
 
-    let dmarker = new mapboxgl.Marker(custom_dest_ep)  //el from above stylization ex
+    let dmarker = new mapboxgl.Marker(custom_dest_ep)
       .setLngLat(dest_ll)
       .addTo(map);
     endpoints.push(dmarker)
@@ -221,6 +234,7 @@ function drawFencing(fencingData){
   clearFencing();
   fencingData.forEach((pt) => {
 
+      //console.log(pt["lon"], pt["lat"]);
                 var pt_ll = new mapboxgl.LngLat(pt["lon"], pt["lat"]);
 
 
@@ -236,6 +250,36 @@ function drawFencing(fencingData){
 
 function clearFencing(){
   fencing.forEach((marker) => marker.remove());
+}
+
+
+function drawCheckedPoints(checkedPointsData){
+
+  clearCheckedPoints();
+
+
+
+  checkedPointsData.forEach((pt) => {
+
+  var checked_ep = document.createElement('div');
+  checked_ep.className = 'checkedpoint_marker';
+
+
+                var pt_ll = new mapboxgl.LngLat(pt["lon"], pt["lat"]);
+
+
+    let marker = new mapboxgl.Marker(checked_ep)
+      .setLngLat(pt_ll)
+      .addTo(map);
+    checkedPoints.push(marker)
+
+
+  });  // end fencingData foreach
+
+}
+
+function clearCheckedPoints(){
+  checkedPoints.forEach((marker) => marker.remove());
 }
 
 
@@ -262,16 +306,17 @@ $(document).on('change', '.trip_checkbox', function() {
     // route geometry json comes from a GET to mapbox API in Trip model method
     //will try and save/cache this data due to API restrictions
 
-console.log(data);
+
     data = JSON.parse(data);
-console.log(data);
 
 
 featureData=data['features'];
 endpointData=data['endpoints'];
+checkedPointsData=data['checkedpoints'];
 
 drawFeatures(featureData);
 drawEndpoints(endpointData);
+drawCheckedPoints(checkedPointsData);
 
 });  //end .$post  for getting trip features
 
@@ -284,9 +329,9 @@ drawEndpoints(endpointData);
     // route geometry json comes from a GET to mapbox API in Trip model method
     //will try and save/cache this data due to API restrictions
 
-console.log(data);
+//console.log(data);
     data = JSON.parse(data);
-console.log(data);
+//console.log(data);
 
 fencingData=data['markers'];
 
@@ -309,7 +354,7 @@ drawFencing(fencingData);
 
 
 map.on('load', function(e) {
-console.log('MAP LOADED');
+//console.log('MAP LOADED');
 
 
 });   //end map load

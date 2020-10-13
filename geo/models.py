@@ -193,6 +193,7 @@ class Trip(models.Model):
     route = models.JSONField(default=dict, blank=True)
     endpoints = models.JSONField(default=dict, blank=True)
     fencing = models.JSONField(default=dict, blank=True)
+    checked_points = models.JSONField(default=dict, blank=True)
 
 
     __original_name = None
@@ -200,6 +201,7 @@ class Trip(models.Model):
     def __init__(self, *args, **kwargs):
         super(Trip, self).__init__(*args, **kwargs)
         self.__original_load = self.load
+        self.__original_check_point = self.check_point
 
     def clean(self, *args, **kwargs):
         if self.route is None:
@@ -208,22 +210,68 @@ class Trip(models.Model):
             self.endpoints = "{}"
         if self.fencing is None:
             self.fencing = "{}"
+        if self.checked_points is None:
+            self.checked_points = "{}"
 
     def save(self, *args, **kwargs):
-
-        recalc = True if self.load != self.__original_load else False
-
         self.clean()
+
+        #If they change the origin/ destination, going to want to recalculate route (MAYBE NOT ALWAYS THO)
+        recalc = True if (self.load != self.__original_load
+                          or self.check_point != self.__original_check_point) else False
         self.get_endpoints(recalc=recalc)
 
-        #self.get_fencing() #calls no_limit_directions TODO I think
+
+        #If checkpoint changes, recalc route
+        # if self.check_point != self.__original_check_point:
+            # fm = self.check_point
+            # fmid = fm.device_id
+            #
+            # fm_lat, fm_lon = None, None
+            # if fm.loc:
+            #     fm_lat, fm_lon = fm.loc.lat, fm.loc.lon
+            # if (fmid not in [fm['id'] for fm in self.fencing]) and (fm_lat and fm_lon):
+            #     recalc=True
 
 
-        self.update_fencing(recalc=recalc)  #calls get_fencing and no_limit_directions if nessecary
+        self.get_checked_points(recalc=recalc)
+
+        self.get_fencing(recalc=recalc)  #calls no_limit_directions
+
+
+        # self.update_fencing(recalc=recalc)  #calls get_fencing and no_limit_directions if nessecary
+
         super().save(*args, **kwargs)
 
     def __str__(self):
         return 'load: %s \ntracker: %s'%(self.load.id, str(self.tracker))
+
+
+    def get_checked_points(self, recalc=False):
+        checked_points = self.checked_points
+        if recalc:
+            lcp = self.check_point
+
+            id, lat, lon = lcp.device_id, lcp.loc.lat, lcp.loc.lon
+
+
+            coord = {'id': str(id),
+                     'lon': str(lon),
+                     'lat': str(lat),
+                     # 'last': 0
+                     }
+
+
+            if type(checked_points) == list:
+                checked_points.append(coord)
+            else:
+                checked_points = [coord]
+
+
+            self.checked_points = checked_points
+
+        return checked_points
+
 
 
     def no_limit_directions(self, recalc=False):
@@ -299,7 +347,7 @@ class Trip(models.Model):
             # truck_points = [[ts[8], ts[7]] for ts in truck_stop_df.values]  # fm_df.values  # shape (800, 2)
             # fencing_points = truck_points
 
-            #id, lat, lon
+            #id, lat, lon  #TODO [fm.loc for fm in fm.all()]
             fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
 
             #gotta flip the lat, lon
@@ -323,7 +371,7 @@ class Trip(models.Model):
                     coord = {'id': str(fmc[0]),
                              'lon': str(fmc[2]),
                              'lat': str(fmc[1]),
-                             'last': 0
+                             # 'last': 0
                              }
                     fencing.append(coord)
 
@@ -355,23 +403,26 @@ class Trip(models.Model):
             fm_lat, fm_lon = fm.loc.lat, fm.loc.lon
 
 
-        print('FMID', fmid)
-        if fmid in [fm['id'] for fm in fencing]:
-            idx = [fm['id'] for fm in fencing].index(fmid)
-            fencing[idx]['last']=1
-        elif (fm_lat and fm_lon): # went off track, add the fm to trip
-            fencing = self.get_fencing(recalc=recalc)
+        # print('FMID', fmid)
+        # if fmid in [fm['id'] for fm in fencing]:
+        #     idx = [fm['id'] for fm in fencing].index(fmid)
+        #     fencing[idx]['last']=1
+        # elif (fm_lat and fm_lon): # went off track, add the fm to trip
+        #     fencing = self.get_fencing(recalc=recalc)
             # fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
             # this_row = fencing_df.loc[fencing_df['ID'] == fmid]
             # lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
-            fencing.append({'id': fmid,
-                             'lon': str(fm_lon),
-                             'lat': str(fm_lat),
-                             'last': 1
-                             })
+
+        if (fmid not in [fm['id'] for fm in fencing]) and (fm_lat and fm_lon): # went off track, add the fm to trip
+            fencing = self.get_fencing(recalc=recalc)
+
+
+            # fencing.append({'id': fmid,
+            #                  'lon': str(fm_lon),
+            #                  'lat': str(fm_lat),
+            #                  'last': 1
+            #                  })
             # self.route = self.no_limit_directions(recalc=True) in get_fencing
-        else:
-            pass
         logger.info('FINISHED UPDATE FENCING')
 
         self.fencing=fencing

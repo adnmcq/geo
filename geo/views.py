@@ -317,8 +317,8 @@ def add_trip_to_map(request):
 
     data = []
     endpoint_dump = []
-
     features = []
+    checkedpoints_dump = []
 
     for trip_id in trip_ids:
 
@@ -343,9 +343,14 @@ def add_trip_to_map(request):
         endpoint_coords = trip.get_endpoints()
         endpoint_dump.append(endpoint_coords)
 
+        checkedpoints_coords = trip.get_checked_points()
+        checkedpoints_dump+=checkedpoints_coords#.append(checkedpoints_coords)
+
     feature_collection = FeatureCollection(features)
 
-    return HttpResponse(json.dumps({'endpoints': endpoint_dump, 'features': feature_collection}))#json.dumps(feature_collection))
+    return HttpResponse(json.dumps({'endpoints': endpoint_dump,
+                                    'features': feature_collection,
+                                    'checkedpoints':checkedpoints_dump}))#json.dumps(feature_collection))
 
 
 
