@@ -204,18 +204,22 @@ class Trip(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
-        self.get_fencing() #calls no_limit_directions TODO I think
         self.get_endpoints()
+
+        #self.get_fencing() #calls no_limit_directions TODO I think
+
+
+        self.update_fencing()  #calls get_fencing and no_limit_directions if nessecary
         super().save(*args, **kwargs)
 
     def __str__(self):
         return 'load: %s \ntracker: %s'%(self.load.id, str(self.tracker))
 
 
-    def no_limit_directions(self):
+    def no_limit_directions(self, recalc=False):
 
         #https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
-        if self.route and self.route!="{}":
+        if (self.route and self.route!="{}") and not recalc:
             data = self.route
         else:
             o, d = self.load.orig, self.load.dest
@@ -247,7 +251,7 @@ class Trip(models.Model):
             data = json.loads(dict_str)
 
             self.route = data
-            self.save()
+            # self.save()
         return data
 
     def get_endpoints(self):
@@ -265,17 +269,17 @@ class Trip(models.Model):
             # coord = json.loads(coord)
 
             self.endpoints = coord
-            self.save()
+            # self.save()
 
         return coord
 
 
-    def get_fencing(self):
+    def get_fencing(self, recalc=False):
 
-        if self.fencing and self.fencing != "{}":
+        if (self.fencing and self.fencing != "{}") and not recalc:
             fencing = self.fencing
         else:
-            directions = self.no_limit_directions()
+            directions = self.no_limit_directions(recalc)
 
             route_coordinates = directions['routes'][0]['geometry']['coordinates']
 
@@ -291,28 +295,30 @@ class Trip(models.Model):
             #gotta flip the lat, lon
             #to id, lon, lat
             # to match what is retured by the routes endpoint
-            fencing_points = [[ts[0], ts[2], ts[1]] for ts in fencing_df.values]
+            # fencing_points = [[ts[0], ts[2], ts[1]] for ts in fencing_df.values]
+
+            fencing_points = [[ts[2], ts[1]] for ts in fencing_df.values]
 
             # ndarray fencing_points.shape
             # Out[3]: (802, 3)
 
-            route_points, fencing_points = np.array(route_points) , np.array(fencing_points)
+            route_points, fencing_points = np.array(route_points).astype(float) , np.array(fencing_points).astype(float)
 
-            all_distances = distance_matrix(route_points, fencing_points[:,1:]) #just lat, lon
+            all_distances = distance_matrix(route_points, fencing_points) #just lat, lon
 
             fencing = []
 
-            for col, fmc in zip(all_distances.T, fencing_points):
+            for col, fmc in zip(all_distances.T, fencing_df.values):
                 if min(col) < 0.1:
                     coord = {'id': str(fmc[0]),
-                             'lon': str(fmc[1]),
-                             'lat': str(fmc[2]),
+                             'lon': str(fmc[2]),
+                             'lat': str(fmc[1]),
                              'last': 0
                              }
                     fencing.append(coord)
 
             self.fencing = fencing
-            self.save()
+            # self.save()
 
         return fencing
 
@@ -324,7 +330,7 @@ class Trip(models.Model):
 
         fencing = self.get_fencing()
 
-        logger.info('ORIGINAL FENCING', fencing)
+
 
 
         # go through the fencing modules associated with trip, highlight red the one
@@ -332,22 +338,34 @@ class Trip(models.Model):
 
 
         #TODO how to set the loc field on FM model? With fencing_locations.csv
-        fmid =  self.check_point.device_id
+        fm =  self.check_point
+        fmid = fm.device_id
+
+        fm_lat, fm_lon = None, None
+        if fm.loc:
+            fm_lat, fm_lon = fm.loc.lat, fm.loc.lon
+
 
         print('FMID', fmid)
         if fmid in [fm['id'] for fm in fencing]:
             idx = [fm['id'] for fm in fencing].index(fmid)
             fencing[idx]['last']=1
-        else: # went off track, add the
-            #id, lat, lon
-            fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
-            this_row = fencing_df.loc[fencing_df['ID'] == fmid]
-            lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
+        elif (fm_lat and fm_lon): # went off track, add the fm to trip
+            fencing = self.get_fencing(recalc=True)
+            # fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
+            # this_row = fencing_df.loc[fencing_df['ID'] == fmid]
+            # lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
             fencing.append({'id': fmid,
-                             'lon': lon,
-                             'lat': lat,
+                             'lon': str(fm_lon),
+                             'lat': str(fm_lat),
                              'last': 1
                              })
+            # self.route = self.no_limit_directions(recalc=True) in get_fencing
+        else:
+            pass
         logger.info('FINISHED UPDATE FENCING')
 
-        return 1
+        self.fencing=fencing
+        # self.save()
+
+        return fencing

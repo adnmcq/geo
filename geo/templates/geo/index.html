@@ -1,6 +1,13 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block content %}
+
+
+
+
+
+
+
  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Overview</h1>
       </div>
@@ -75,6 +82,27 @@
   <!--</div>-->
 
       </div>  <!-- Accordian -->
+
+
+
+
+<!-- FOR SOME REASON THIS DECLARATION NEEDS TO BE AFTER MAP DIV  -->
+
+<!-- https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png -->
+   <style>
+
+
+ .endpoint_marker {
+  background-image: url("{%  static 'img/red_icon.png' %}");
+  background-size: cover;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+
+</style>
+
+
 {% endblock %}
 
 
@@ -150,22 +178,35 @@ console.log(featureData);
 
 function drawEndpoints(endpointData){
   clearEndpoints();
+
+  var custom_orig_ep = document.createElement('div');
+  custom_orig_ep.className = 'endpoint_marker';
+
+  var custom_dest_ep = document.createElement('div');
+  custom_dest_ep.className = 'endpoint_marker';
+
+
   endpointData.forEach((ends) => {
 
                 var dest_ll = new mapboxgl.LngLat(ends["dest_lon"], ends["dest_lat"]);
                 var orig_ll = new mapboxgl.LngLat(ends["orig_lon"], ends["orig_lat"]);
 
 
+  // create a HTML element for each feature
+//FROM https://docs.mapbox.com/help/tutorials/custom-markers-gl-js/
 
-    let dmarker = new mapboxgl.Marker()
+
+    let omarker = new mapboxgl.Marker(custom_orig_ep)
+      .setLngLat(orig_ll)
+      .addTo(map);
+    endpoints.push(omarker)
+
+
+    let dmarker = new mapboxgl.Marker(custom_dest_ep)  //el from above stylization ex
       .setLngLat(dest_ll)
       .addTo(map);
     endpoints.push(dmarker)
 
-    let omarker = new mapboxgl.Marker()
-      .setLngLat(orig_ll)
-      .addTo(map);
-    endpoints.push(omarker)
   });  // end endpointData foreach
 
 }
@@ -309,3 +350,5 @@ $( "#accordion" ).accordion();
 
 
 {% endblock %}
+
+

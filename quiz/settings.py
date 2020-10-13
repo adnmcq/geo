@@ -176,3 +176,5 @@ LOGIN_REDIRECT_URL  = '/'
 # Configure Django App for Heroku.
 import django_heroku
 django_heroku.settings(locals(), logging=False)  #https://stackoverflow.com/questions/18920428/django-logging-on-heroku
+
+DATA_UPLOAD_MAX_MEMORY_SIZE=None #My calculate route functions are just too big

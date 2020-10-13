@@ -220,7 +220,7 @@ def events(request, device_id):
                 fake_trip_to_update.save()
                 # device_data()
 
-                fake_trip_to_update.update_fencing()
+                # fake_trip_to_update.update_fencing()
 
 
         '''
