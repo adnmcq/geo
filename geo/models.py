@@ -194,6 +194,13 @@ class Trip(models.Model):
     endpoints = models.JSONField(default=dict, blank=True)
     fencing = models.JSONField(default=dict, blank=True)
 
+
+    __original_name = None
+
+    def __init__(self, *args, **kwargs):
+        super(Trip, self).__init__(*args, **kwargs)
+        self.__original_load = self.load
+
     def clean(self, *args, **kwargs):
         if self.route is None:
             self.route = "{}"
@@ -203,13 +210,16 @@ class Trip(models.Model):
             self.fencing = "{}"
 
     def save(self, *args, **kwargs):
+
+        recalc = True if self.load != self.__original_load else False
+
         self.clean()
-        self.get_endpoints()
+        self.get_endpoints(recalc=recalc)
 
         #self.get_fencing() #calls no_limit_directions TODO I think
 
 
-        self.update_fencing()  #calls get_fencing and no_limit_directions if nessecary
+        self.update_fencing(recalc=recalc)  #calls get_fencing and no_limit_directions if nessecary
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -254,9 +264,9 @@ class Trip(models.Model):
             # self.save()
         return data
 
-    def get_endpoints(self):
+    def get_endpoints(self, recalc=False):
 
-        if self.endpoints and self.endpoints != "{}":
+        if (self.endpoints and self.endpoints != "{}") and not recalc:
             coord = self.endpoints
         else:
             orig, dest = self.load.orig, self.load.dest
@@ -323,12 +333,11 @@ class Trip(models.Model):
         return fencing
 
 
-    def update_fencing(self):
+    def update_fencing(self, recalc=False):
 
         logger.info('BEGIN UPDATE FENCING')
 
-
-        fencing = self.get_fencing()
+        fencing = self.get_fencing(recalc)
 
 
 
@@ -351,7 +360,7 @@ class Trip(models.Model):
             idx = [fm['id'] for fm in fencing].index(fmid)
             fencing[idx]['last']=1
         elif (fm_lat and fm_lon): # went off track, add the fm to trip
-            fencing = self.get_fencing(recalc=True)
+            fencing = self.get_fencing(recalc=recalc)
             # fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
             # this_row = fencing_df.loc[fencing_df['ID'] == fmid]
             # lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
