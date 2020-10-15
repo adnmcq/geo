@@ -180,7 +180,7 @@ def events(request, device_id):
     # module = FencingModule.objects.get(device_id=device_id)
     if request.method == "POST":
         data = request.POST.dict()#logger.info(request.POST)
-        logger.info(data)
+        # logger.info(data)
 
         fencing_id = data.get('coreid')
         published_at = data.get('published_at')
@@ -191,19 +191,19 @@ def events(request, device_id):
             tracker_id = device_data_dict.get('DeviceID')
             rssi = device_data_dict.get('RSSI')
 
-            logger.info('webhook POST %s %s %s %s %s' % (fencing_id,
-                                                         published_at,
-                                                         tracker_name,
-                                                         tracker_id,
-                                                         rssi))
+            # logger.info('webhook POST %s %s %s %s %s' % (fencing_id,
+            #                                              published_at,
+            #                                              tracker_name,
+            #                                              tracker_id,
+            #                                              rssi))
             # webhook POST e00fce68aadec91d27441ac2 2020-09-26T19:21:20.266Z iBeacon420 -56
 
             fencing_module, c1 = FencingModule.objects.get_or_create(device_id = fencing_id)
             tracker_chip, c2 = TrackerChip.objects.get_or_create(device_name = tracker_name,
                                                                 device_id = tracker_id)
 
-            logger.info('MODELS %s %s %s %s'%(fencing_module.device_id, fencing_module.device_name,
-                                              tracker_chip.device_id, tracker_chip.device_name))
+            # logger.info('MODELS %s %s %s %s'%(fencing_module.device_id, fencing_module.device_name,
+            #                                   tracker_chip.device_id, tracker_chip.device_name))
 
 
             fake_load = Load.objects.all()[0]
@@ -324,7 +324,7 @@ def add_trip_to_map(request):
 
         trip = Trip.objects.get(pk = trip_id)
 
-        # directions = trip.load.no_limit_directions()
+        #get, no call to mapbox API
         directions=trip.no_limit_directions()
 
         coordinates = directions['routes'][0]['geometry']['coordinates']

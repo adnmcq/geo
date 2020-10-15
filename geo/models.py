@@ -131,51 +131,62 @@ class Load(models.Model):
     def __str__(self):
         return 'orig: %s \ndest: %s'%(str(self.orig), str(self.dest))
 
-    def directions(self):
-        url = "https://api.mapbox.com/matching/v5/mapbox/driving?access_token=%s"%MAPBOX_ACCESS_TOKEN
 
-        o, d = self.orig, self.dest
+class Route(models.Model):
+    orig = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE, related_name='rt_orig')
+    dest = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE, related_name='rt_dest')
+    route = models.JSONField(default=dict, blank=True)
 
-        '''
-        payload = 'coordinates=-117.17282%2C32.71204%3B-117.17288%2C32.71225%3B-117.17293%2C32.71244%3B-117.17292%2C32.71256%3B-117.17298%2C32.712603%3B-117.17314%2C32.71259%3B-117.17334%2C32.71254'
-        '''
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['orig', 'dest'], name='one_route')
+        ]
 
-        search_string = urllib.parse.quote("%s,%s;%s,%s"%(o.lon, o.lat, d.lon, d.lat))
+    def clean(self, *args, **kwargs):
+        if self.route is None:
+            self.route = "{}"
 
-        payload = 'coordinates=%s'%search_string
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-
-        response = requests.request("POST", url, headers=headers, data=payload)
-
-        # print(response.text.encode('utf8'))
-        dict_str = response.text
-        data = json.loads(dict_str)
-        return data
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def no_limit_directions(self):
-        o, d = self.orig, self.dest
-        search_string = urllib.parse.quote("%s,%s;%s,%s"%(o.lon, o.lat, d.lon, d.lat))
+        '''
+        getter/ setter - set if recalc==True
+        :param recalc:
+        :return:
+        '''
 
-        url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s"%(search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
+        # https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
+        if (self.route and self.route != "{}"):
+            data = self.route
+        else:
+            o, d = self.orig, self.dest
 
-        payload = {}
-        headers = {
-            'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
-            'Accept': '*/*',
-            'Origin': 'https://docs.mapbox.com',
-            'Sec-Fetch-Site': 'same-site',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Dest': 'empty',
-            'Referer': 'https://docs.mapbox.com/',
-            'Accept-Language': 'en-US,en;q=0.9'
-        }
+            search_string = urllib.parse.quote("%s,%s;%s,%s" % (o.lon, o.lat, d.lon, d.lat))
 
-        response = requests.request("GET", url, headers=headers, data=payload)
-        dict_str = response.text
-        data = json.loads(dict_str)
+            url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s" % (
+            search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
+
+            payload = {}
+            headers = {
+                'Connection': 'keep-alive',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
+                'Accept': '*/*',
+                'Origin': 'https://docs.mapbox.com',
+                'Sec-Fetch-Site': 'same-site',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Dest': 'empty',
+                'Referer': 'https://docs.mapbox.com/',
+                'Accept-Language': 'en-US,en;q=0.9'
+            }
+
+            response = requests.request("GET", url, headers=headers, data=payload)
+            dict_str = response.text
+            data = json.loads(dict_str)
+
+        self.route = data
+
         return data
 
 class Trip(models.Model):
@@ -197,6 +208,7 @@ class Trip(models.Model):
 
 
     __original_name = None
+    __original_check_point = None
 
     def __init__(self, *args, **kwargs):
         super(Trip, self).__init__(*args, **kwargs)
@@ -221,25 +233,9 @@ class Trip(models.Model):
                           or self.check_point != self.__original_check_point) else False
         self.get_endpoints(recalc=recalc)
 
-
-        #If checkpoint changes, recalc route
-        # if self.check_point != self.__original_check_point:
-            # fm = self.check_point
-            # fmid = fm.device_id
-            #
-            # fm_lat, fm_lon = None, None
-            # if fm.loc:
-            #     fm_lat, fm_lon = fm.loc.lat, fm.loc.lon
-            # if (fmid not in [fm['id'] for fm in self.fencing]) and (fm_lat and fm_lon):
-            #     recalc=True
-
-
         self.get_checked_points(recalc=recalc)
 
         self.get_fencing(recalc=recalc)  #calls no_limit_directions
-
-
-        # self.update_fencing(recalc=recalc)  #calls get_fencing and no_limit_directions if nessecary
 
         super().save(*args, **kwargs)
 
@@ -248,6 +244,11 @@ class Trip(models.Model):
 
 
     def get_checked_points(self, recalc=False):
+        '''
+        getter/ setter - set if recalc==True
+        :param recalc:
+        :return:
+        '''
         checked_points = self.checked_points
         if recalc:
             lcp = self.check_point
@@ -258,7 +259,6 @@ class Trip(models.Model):
             coord = {'id': str(id),
                      'lon': str(lon),
                      'lat': str(lat),
-                     # 'last': 0
                      }
 
 
@@ -272,9 +272,12 @@ class Trip(models.Model):
 
         return checked_points
 
-
-
     def no_limit_directions(self, recalc=False):
+        '''
+        getter/ setter - set if recalc==True
+        :param recalc:
+        :return:
+        '''
 
         #https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
         if (self.route and self.route!="{}") and not recalc:
@@ -287,32 +290,43 @@ class Trip(models.Model):
             else:
                 from_loc=o
 
-            search_string = urllib.parse.quote("%s,%s;%s,%s"%(from_loc.lon, from_loc.lat, d.lon, d.lat))
+            route_already_saved_to_db_qs = Route.objects.filter(orig = from_loc, dest = d)
 
-            url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s"%(search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
+            if route_already_saved_to_db_qs.first():
+                data = route_already_saved_to_db_qs.first().route
 
-            payload = {}
-            headers = {
-                'Connection': 'keep-alive',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
-                'Accept': '*/*',
-                'Origin': 'https://docs.mapbox.com',
-                'Sec-Fetch-Site': 'same-site',
-                'Sec-Fetch-Mode': 'cors',
-                'Sec-Fetch-Dest': 'empty',
-                'Referer': 'https://docs.mapbox.com/',
-                'Accept-Language': 'en-US,en;q=0.9'
-            }
+            else:
+                search_string = urllib.parse.quote("%s,%s;%s,%s"%(from_loc.lon, from_loc.lat, d.lon, d.lat))
 
-            response = requests.request("GET", url, headers=headers, data=payload)
-            dict_str = response.text
-            data = json.loads(dict_str)
+                url = "https://api.mapbox.com/directions/v5/mapbox/driving/%s.json?geometries=geojson&alternatives=true&steps=true&overview=full&access_token=%s"%(search_string, MAPBOX_NO_LIMIT_ACCESS_TOKEN)
+
+                payload = {}
+                headers = {
+                    'Connection': 'keep-alive',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
+                    'Accept': '*/*',
+                    'Origin': 'https://docs.mapbox.com',
+                    'Sec-Fetch-Site': 'same-site',
+                    'Sec-Fetch-Mode': 'cors',
+                    'Sec-Fetch-Dest': 'empty',
+                    'Referer': 'https://docs.mapbox.com/',
+                    'Accept-Language': 'en-US,en;q=0.9'
+                }
+
+                response = requests.request("GET", url, headers=headers, data=payload)
+                dict_str = response.text
+                data = json.loads(dict_str)
 
             self.route = data
-            # self.save()
+
         return data
 
     def get_endpoints(self, recalc=False):
+        '''
+        getter/ setter - set if recalc==True
+        :param recalc:
+        :return:
+        '''
 
         if (self.endpoints and self.endpoints != "{}") and not recalc:
             coord = self.endpoints
@@ -324,15 +338,17 @@ class Trip(models.Model):
                     'dest_lat':str(dest.lat),
                     'dest_lon':str(dest.lon)}
 
-            # coord = json.loads(coord)
-
             self.endpoints = coord
-            # self.save()
 
         return coord
 
 
     def get_fencing(self, recalc=False):
+        '''
+        getter/ setter - set if recalc==True
+        :param recalc:
+        :return:
+        '''
 
         if (self.fencing and self.fencing != "{}") and not recalc:
             fencing = self.fencing
@@ -343,22 +359,10 @@ class Trip(models.Model):
 
             route_points = route_coordinates  # rt_df.values  # shape (100k, 2)
 
-            # truck_stop_df = pd.read_csv(os.path.join(BASE_DIR, 'pilot_locations.csv'))
-            # truck_points = [[ts[8], ts[7]] for ts in truck_stop_df.values]  # fm_df.values  # shape (800, 2)
-            # fencing_points = truck_points
-
             #id, lat, lon  #TODO [fm.loc for fm in fm.all()]
             fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
 
-            #gotta flip the lat, lon
-            #to id, lon, lat
-            # to match what is retured by the routes endpoint
-            # fencing_points = [[ts[0], ts[2], ts[1]] for ts in fencing_df.values]
-
             fencing_points = [[ts[2], ts[1]] for ts in fencing_df.values]
-
-            # ndarray fencing_points.shape
-            # Out[3]: (802, 3)
 
             route_points, fencing_points = np.array(route_points).astype(float) , np.array(fencing_points).astype(float)
 
@@ -371,61 +375,10 @@ class Trip(models.Model):
                     coord = {'id': str(fmc[0]),
                              'lon': str(fmc[2]),
                              'lat': str(fmc[1]),
-                             # 'last': 0
                              }
                     fencing.append(coord)
 
             self.fencing = fencing
-            # self.save()
 
         return fencing
 
-
-    def update_fencing(self, recalc=False):
-
-        logger.info('BEGIN UPDATE FENCING')
-
-        fencing = self.get_fencing(recalc)
-
-
-
-
-        # go through the fencing modules associated with trip, highlight red the one
-        #that is last
-
-
-        #TODO how to set the loc field on FM model? With fencing_locations.csv
-        fm =  self.check_point
-        fmid = fm.device_id
-
-        fm_lat, fm_lon = None, None
-        if fm.loc:
-            fm_lat, fm_lon = fm.loc.lat, fm.loc.lon
-
-
-        # print('FMID', fmid)
-        # if fmid in [fm['id'] for fm in fencing]:
-        #     idx = [fm['id'] for fm in fencing].index(fmid)
-        #     fencing[idx]['last']=1
-        # elif (fm_lat and fm_lon): # went off track, add the fm to trip
-        #     fencing = self.get_fencing(recalc=recalc)
-            # fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
-            # this_row = fencing_df.loc[fencing_df['ID'] == fmid]
-            # lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
-
-        if (fmid not in [fm['id'] for fm in fencing]) and (fm_lat and fm_lon): # went off track, add the fm to trip
-            fencing = self.get_fencing(recalc=recalc)
-
-
-            # fencing.append({'id': fmid,
-            #                  'lon': str(fm_lon),
-            #                  'lat': str(fm_lat),
-            #                  'last': 1
-            #                  })
-            # self.route = self.no_limit_directions(recalc=True) in get_fencing
-        logger.info('FINISHED UPDATE FENCING')
-
-        self.fencing=fencing
-        # self.save()
-
-        return fencing

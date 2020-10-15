@@ -89,6 +89,25 @@ def db():
         # extra = cit.forward()
         # extra2 = cit.reverse()
 
+    #add truckstop locations
+    '''
+    Store#,Name,Address,City,State/Province,Country,Zip,Interstate,Latitude,Longitude,Phone,Fax,Parking Spaces,Diesel Lanes,Bulk DEF Lanes,Showers,CAT Scale,Facilities/Restaurants,WiFi
+1,"Pilot Travel Center","5868 Nittany Valley Drive","Mill Hall","PA","US","17751","I-80  Exit 173","41.03395900","-77.51567200","(570) 726-7618","(570) 726-5092","70","8","8","5","Yes","Subway, Breakfast/Soup Bar, Cinnabon","No",
+
+    '''
+    fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'pilot_locations.csv'))
+    for i, r in fencing_df.iterrows():
+
+        #oboe bc uses the store # as ID
+        ts, c = Location.objects.get_or_create(
+            city=r[2],
+            state=r[3],
+            zip=None,
+            lat=r[7], lon=r[8]
+        )
+
+
+
 
     #FencingModule
 
@@ -103,17 +122,9 @@ def db():
     for device_json in devices_response.json():
 
         print(device_json)
-        if 'Fencing' not in device_json['name']:
-            #I don't think this hits, i think all 'devices' are FencingModules
-            tc, c = TrackerChip.objects.get_or_create(
-                device_name=device_json['name'],
-                #created_date=created_date,
-                device_id=device_json['id'],
-                client=cli
-            )
-        else:
+        if 'Fencing'  in device_json['name']:
             city_name = device_json['name'].split('_')[1]
-            loc = Location.objects.get(city=city_name)
+            loc = Location.objects.filter(city=city_name)[0]
             fm, c = FencingModule.objects.get_or_create(
                 device_name=device_json['name'],
                 #created_date=created_date,
@@ -121,15 +132,24 @@ def db():
                 loc=loc
             )
 
-    #Load
+
+
+    #Fake Tracker
+    tc, c = TrackerChip.objects.get_or_create(
+        device_name='TIM69_420',
+        #created_date=created_date,
+        device_id='abdc',
+        client=cli
+        )
+
+    # CREATE SOME FAKE LOADS
     origins = ['Temecula','Pueblo','Topeka']
     destinations = ['Abilene','Simi Valley','Fargo']
 
-    #CREATE SOME FAKE LOADS
 
     for o, d in zip(origins, destinations):
-        oo = Location.objects.get(city = o)
-        do = Location.objects.get(city = d)
+        oo = Location.objects.filter(city = o)[0]
+        do = Location.objects.filter(city = d)[0]
 
         fm, c = Load.objects.get_or_create(
             ref1_type='L',
