@@ -76,11 +76,11 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
 
 def loop_thru_routes(routes = city2city_rts):
     for rt in routes:
-        city = rt.orig.city
+        rt.no_limit_directions(test=1)
     return 1
 
 start_time = time.time()
-loop_thru_routes()
+# loop_thru_routes()
 print("--- %s seconds LOOP NO threading ---" % (time.time() - start_time))  #141.46203207969666 seconds LOOP NO threading
 pt = "--- %s seconds LOOP NO threading ---" % (time.time() - start_time)
 logger.info(pt)
@@ -92,13 +92,16 @@ def chunks(lst, chunk_size):
         yield lst[i:i + chunk_size]
 
 
-divsors = [1, 10, 100, 1000, 10000]#aka num of threads
+city2city_rts_ltd = city2city_rts.filter(route = {})[:100]
+
+divsors = [10]#aka num of threads
 for div in divsors:
     with concurrent.futures.ThreadPoolExecutor() as executor:
 
-        chunk_size = int(len(city2city_rts)/div)
+        chunk_size = int(len(city2city_rts_ltd)/div)
 
-        css = "ChunkSize %s" % chunk_size
+        # css = "ChunkSize %s" % chunk_size
+        # print(css)
 
         start_time = time.time()
         # div = int(len(city2city_rts)/5)
@@ -106,10 +109,9 @@ for div in divsors:
         # qsets = [city2city_rts[:div], city2city_rts[div:2*div], city2city_rts[2*div:3*div],
         #          city2city_rts[3*div:4*div], city2city_rts[4*div:]]
 
-        qsets = list(chunks(city2city_rts, chunk_size))  #not how many chunks, but chunks of this size
+        qsets = list(chunks(city2city_rts_ltd, chunk_size))  #not how many chunks, but chunks of this size
         results = executor.map(loop_thru_routes, qsets)  # starts and joins threads
-        for result in results:
-            # print(result)
+        for _ in results:
             pass
 
         pt = "--- %s seconds LOOP w %s threads ---" % (time.time() - start_time, div)

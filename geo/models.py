@@ -150,7 +150,7 @@ class Route(models.Model):
         self.clean()
         super().save(*args, **kwargs)
 
-    def no_limit_directions(self):
+    def no_limit_directions(self, test=False):
         '''
         getter/ setter - set if recalc==True
         :param recalc:
@@ -181,11 +181,19 @@ class Route(models.Model):
                 'Accept-Language': 'en-US,en;q=0.9'
             }
 
+            # try:
             response = requests.request("GET", url, headers=headers, data=payload)
+            if response.status_code!=200:
+                logger.info(response)
             dict_str = response.text
             data = json.loads(dict_str)
+            # except MemoryError as e:
+            logger.info("%s to %s "%(self.orig, self.dest))
+            # data = None
 
         self.route = data
+        if test:
+            self.save()
 
         return data
 
