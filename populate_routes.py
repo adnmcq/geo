@@ -91,11 +91,15 @@ def chunks(lst, chunk_size):
     for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    divsors = [1, 10, 100, 1000, 10000]#aka num of threads
-    for div in divsors:
+
+divsors = [1, 10, 100, 1000, 10000]#aka num of threads
+for div in divsors:
+    with concurrent.futures.ThreadPoolExecutor() as executor:
 
         chunk_size = int(len(city2city_rts)/div)
+
+        css = "ChunkSize %s" % chunk_size
+
         start_time = time.time()
         # div = int(len(city2city_rts)/5)
         # print(type(div))

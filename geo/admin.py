@@ -3,4 +3,4 @@ from django.contrib import admin
 # Register your models here.
 from .models import *
 
-admin.site.register([Client, Location, FencingModule, TrackerChip, Trip, Load])
+admin.site.register([Client, Location, FencingModule, TrackerChip, Trip, Load, Route])
