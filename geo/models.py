@@ -6,7 +6,7 @@ from quiz.settings import MAPBOX_ACCESS_TOKEN, PARTICLE_ACCESS_TOKEN, MAPBOX_NO_
 
 import requests, datetime
 import urllib.parse
-import json, os
+import json, os, time
 import numpy as np
 from scipy.spatial import distance_matrix
 import pandas as pd
@@ -159,7 +159,7 @@ class Route(models.Model):
 
         # https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
         if (self.route and self.route != "{}"):
-            data = self.route
+            return self.route
         else:
             o, d = self.orig, self.dest
 
@@ -185,17 +185,17 @@ class Route(models.Model):
             response = requests.request("GET", url, headers=headers, data=payload)
             if response.status_code!=200:
                 logger.info(response)
-            dict_str = response.text
-            data = json.loads(dict_str)
-            # except MemoryError as e:
-            logger.info("%s to %s "%(self.orig, self.dest))
-            # data = None
+                if response.status_code==429:
+                    time.sleep(1)
 
-        self.route = data
+            else:
+                dict_str = response.text
+                data = json.loads(dict_str)
+                self.route = data
         if test:
             self.save()
 
-        return data
+        return self.route
 
 class Trip(models.Model):
     tracker = models.ForeignKey(TrackerChip, on_delete=models.CASCADE)
@@ -257,7 +257,7 @@ class Trip(models.Model):
         :param recalc:
         :return:
         '''
-        checked_points = self.checked_points
+
         if recalc:
             lcp = self.check_point
 
@@ -270,15 +270,12 @@ class Trip(models.Model):
                      }
 
 
-            if type(checked_points) == list:
-                checked_points.append(coord)
+            if type(self.checked_points) == list:
+                self.checked_points.append(coord)
             else:
-                checked_points = [coord]
+                self.checked_points = [coord]
 
-
-            self.checked_points = checked_points
-
-        return checked_points
+        return self.checked_points
 
     def no_limit_directions(self, recalc=False):
         '''
@@ -289,7 +286,7 @@ class Trip(models.Model):
 
         #https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield
         if (self.route and self.route!="{}") and not recalc:
-            data = self.route
+            return self.route
         else:
             o, d = self.load.orig, self.load.dest
 
@@ -325,9 +322,11 @@ class Trip(models.Model):
                 dict_str = response.text
                 data = json.loads(dict_str)
 
+                new_route = Route.objects.create(orig=from_loc, dest=d, route=data)
+
             self.route = data
 
-        return data
+        return self.route
 
     def get_endpoints(self, recalc=False):
         '''
@@ -337,7 +336,7 @@ class Trip(models.Model):
         '''
 
         if (self.endpoints and self.endpoints != "{}") and not recalc:
-            coord = self.endpoints
+            return self.endpoints
         else:
             orig, dest = self.load.orig, self.load.dest
 
@@ -348,7 +347,7 @@ class Trip(models.Model):
 
             self.endpoints = coord
 
-        return coord
+        return self.endpoints
 
 
     def get_fencing(self, recalc=False):
@@ -359,7 +358,7 @@ class Trip(models.Model):
         '''
 
         if (self.fencing and self.fencing != "{}") and not recalc:
-            fencing = self.fencing
+            return self.fencing
         else:
             directions = self.no_limit_directions(recalc)
 
@@ -388,5 +387,5 @@ class Trip(models.Model):
 
             self.fencing = fencing
 
-        return fencing
+        return self.fencing
 

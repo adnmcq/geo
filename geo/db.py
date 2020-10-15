@@ -27,6 +27,7 @@ import re
 import datetime
 
 created_date=datetime.date.today()
+import platform
 
 def db():
     '''
@@ -35,11 +36,15 @@ def db():
     :return:
     '''
 
+    Route.objects.all().delete()
+
     Trip.objects.all().delete()
     Load.objects.all().delete()
     TrackerChip.objects.all().delete()
     FencingModule.objects.all().delete()
     Location.objects.all().delete()
+
+
 
     # List (Dict) of FencingModules currently along the highway, to be updated by Admin Only.
     # This would never actually show up in views, only stored through models.
@@ -164,3 +169,38 @@ def db():
 
 
 db()
+
+
+
+
+if 0:#platform.system() == 'Windows':
+    route_locs = Location.objects.all()
+    bulk_chunk = 6000
+else:
+    route_locs = Location.objects.filter(lat__lt=43, lat__gt=41,
+
+                                         lon__lt=-87, lon__gt=-90,)
+
+    print('# NIL LOCS %s'%len(route_locs))
+    bulk_chunk = 200
+
+def make_empty_routes():
+    # all_locs = Location.objects.all()
+    i=0
+    Route.objects.all().delete()
+    entries = []
+    for o in route_locs:
+        for d in route_locs:
+            i+=1
+            entries.append(Route(orig=o, dest=d))
+            if i%bulk_chunk==0 or i==len(route_locs)**2:
+                print(i)
+                Route.objects.bulk_create(entries)
+
+                entries = []
+
+
+
+    print('# Routes NIL WI',len(Route.objects.all()))
+
+make_empty_routes()

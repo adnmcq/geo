@@ -46,5 +46,5 @@ def make_empty_routes():
 
     print(i)
 
-# make_empty_routes()
-Route.objects.all().delete()
+make_empty_routes()
+# Route.objects.all().delete()
