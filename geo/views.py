@@ -164,10 +164,10 @@ def logout_view(request):
 
 @login_required(login_url='/accounts/login/')
 def index(request):
-    fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
-    this_row = fencing_df.loc[fencing_df['ID'] == 'e00fce68aadec91d27441ac2']
-    print(this_row)
-    lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
+    # fencing_df = pd.read_csv(os.path.join(BASE_DIR, 'fencing_locations.csv'))
+    # this_row = fencing_df.loc[fencing_df['ID'] == 'e00fce68aadec91d27441ac2']
+    # print(this_row)
+    # lon, lat = this_row['Longitude'].values[0], this_row['Latitude'].values[0]
 
     context = { 'mapbox_token': MAPBOX_ACCESS_TOKEN}
     return render(request, 'geo/index.html', context)
@@ -191,33 +191,34 @@ def events(request, device_id):
             tracker_id = device_data_dict.get('DeviceID')
             rssi = device_data_dict.get('RSSI')
 
-            # logger.info('webhook POST %s %s %s %s %s' % (fencing_id,
-            #                                              published_at,
-            #                                              tracker_name,
-            #                                              tracker_id,
-            #                                              rssi))
+            logger.info('webhook POST %s %s %s %s %s' % (fencing_id,
+                                                         published_at,
+                                                         tracker_name,
+                                                         tracker_id,
+                                                         rssi))
             # webhook POST e00fce68aadec91d27441ac2 2020-09-26T19:21:20.266Z iBeacon420 -56
 
             fencing_module, c1 = FencingModule.objects.get_or_create(device_id = fencing_id)
             tracker_chip, c2 = TrackerChip.objects.get_or_create(device_name = tracker_name,
                                                                 device_id = tracker_id)
 
-            # logger.info('MODELS %s %s %s %s'%(fencing_module.device_id, fencing_module.device_name,
-            #                                   tracker_chip.device_id, tracker_chip.device_name))
+            logger.info('MODELS %s %s %s %s'%(fencing_module.device_id, fencing_module.device_name,
+                                              tracker_chip.device_id, tracker_chip.device_name))
 
 
-            fake_load = Load.objects.all()[0]
+            # fake_load = Load.objects.all()[0]
 
             #TODO - get all active loads (trips) associated with the tracker, Trip
 
             # client = Client.objects.get(user = request.user) request.user is AnonymousUser
 
-            fake_trips_to_update = Trip.objects.filter(load = fake_load, tracker = tracker_chip)
+            trips_to_update = Trip.objects.filter(tracker = tracker_chip, active = True)
 
-            for fake_trip_to_update in fake_trips_to_update:
-                fake_trip_to_update.check_point = fencing_module
-                fake_trip_to_update.check_point_time = published_at
-                fake_trip_to_update.save()
+            for ttu in trips_to_update:
+
+                ttu.check_point = fencing_module
+                ttu.check_point_time = published_at
+                ttu.save()
                 # device_data()
 
                 # fake_trip_to_update.update_fencing()
